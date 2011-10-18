@@ -6,8 +6,12 @@
 //  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
 
+#include <QString>
+
 namespace AutoUnits
 {
+
+class Dimension;
 
 //==============================================================================
 /// An object that specifies a base unit in a unit system.
@@ -18,15 +22,15 @@ public:
     //==========================================================================
     /// Immutable interface.
     //==========================================================================
-    QString GetName() const;
+    QString Name() const;
     const Dimension *GetDimension() const;
-    QString ConversionToBase() const;
+    QString Conversion() const;
 
     //==========================================================================
     /// Mutable interface.
     //==========================================================================
     Dimension *GetDimension();
-    void SetConversionToBase( const QString& conversion );
+    void SetConversion( const QString& conversion );
 
 private:
     Unit( const QString& name, Dimension *dimension_p );

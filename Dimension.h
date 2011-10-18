@@ -18,9 +18,11 @@ namespace AutoUnits
 /// For instance, acceleration would be [(Meter,1), (Second,-2)]
 typedef QHash<QString,int> DimensionId;
 
+class Unit;
+
 //==============================================================================
 /// An object that defines a dimension in a unit system.
-class Dimension : public 
+class Dimension 
 {
 public:
     
@@ -51,6 +53,12 @@ private:
 
     /// The unique identifier of the dimension.
     DimensionId m_id;
+
+    /// The base unit.
+    Unit *m_base_unit_p;
+
+    /// The list of all units in the dimension.
+    QList<Unit*> m_units;
 };
 
 } // namespace AutoUnits

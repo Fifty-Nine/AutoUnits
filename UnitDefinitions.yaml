@@ -1,0 +1,72 @@
+# The base units. These define the dimensions for the unit system
+# as well as the base units for those dimensions.
+# 
+# The format for each entry is:
+# [ name of dimension, name of base unit for that dimension ]
+#
+BaseUnits:
+  - [ Second, Time ]
+  - [ Kilogram, Mass ]
+  - [ Meter, Distance ]
+  - [ Celsius, Temperature ]
+
+# The derived units. These define additional units in terms of the base units of
+# the unit system. 
+#
+# The format for each entry is:
+#   name: name of derived base unit
+#   units: the derivation of the units (e.g., Meters / Second, 1 / Second)
+#
+# Only base units and "1" are allowed to appear in the derivation expression.
+#
+DerivedUnits:
+  - name: MetersPerSecond
+    derivation: Meters / Second
+
+  - name: MeterSquared
+    derivation: Meter * Meter
+
+# Everything else. These define additional units for the system and conversions
+# to the base units. 
+#
+# The format for each entry is:
+#   name: name of the unit
+#   base: base unit (may be from DerivedUnits)
+#   conversion: the conversion from the unit to the base unit.
+#
+# For most units, the conversion will be a scalar value by which the the value 
+# is multiplied to obtain the base. For more complex conversions, the keyword 
+# 'value' can be used to define a conversion function, like so:
+#
+# conversion: (value - 32) * 5.0 / 9.0
+#
+# where the 'value' keyword represents the value of the quantity in the defined
+# units and the result of the expression should yield the value of the quantity
+# in base units. In this version, all conversions are assumed to be symmetric.
+#
+ConvertedUnits:
+  - name: Pound
+    base: Kilogram
+    conversion: 0.45359237
+    
+  - name: Foot
+    base: Meter
+    conversion: 0.3048
+
+  - name: Fahrenheit
+    base: Celsius
+    conversion: "(value - 32) * 5.0 / 9.0"
+
+  - name: Minute
+    base: Second
+    conversion: 60
+
+  - name: Hour
+    base: Second
+    conversion: 3600
+
+  - name: Acre
+    base: MetersPerSecond
+    conversion: 4046.85642 
+
+

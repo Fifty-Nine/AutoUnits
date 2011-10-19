@@ -12,7 +12,19 @@
 #include <QFileInfo>
 
 #include "DefinitionParser.h"
+#include "Dimension.h"
+#include "QtYaml.h"
 #include "UnitSystem.h"
+
+namespace
+{
+
+QString REDEFINED_DIM_NAME = "Redefinition of dimension \"%1\" on line %2.";
+QString REDEFINED_DIM_ID = "Definition of dimension \"%1\" on line %2 conflicts"
+                           "with definition of dimension \"%3\".";
+QString REDEFINED_UNIT_NAME = "Redefinition of unit \"%1\" on line %2.";
+
+}
 
 namespace AutoUnits
 {
@@ -27,7 +39,7 @@ namespace
 /// 
 /// \return The dimension ID.
 /// 
-DimensionId ParseDerivation( const std::string& str )
+DimensionId ParseDerivation( const QString& str )
 {
     (void)str;
     return DimensionId();
@@ -138,7 +150,41 @@ void DefinitionParser::ParseBaseDimensions( const YAML::Node& dim_list )
 /// 
 void DefinitionParser::ParseBaseDimension( const YAML::Node& dim )
 {
-    (void)dim;
+    QString name; 
+    dim["name"] >> name;
+
+    QString unit_name; 
+    dim["unit"] >> unit_name;
+
+    DimensionId id;
+    id[unit_name] = 1;
+
+    Dimension *dim_p;
+    Unit *unit_p;
+
+    if ( ( dim_p = m_result->GetDimension( name ) ) )
+    {
+        throw ParseError( dim.GetMark().line, 
+            REDEFINED_DIM_NAME.arg( name ).arg( dim.GetMark().line ) );
+    }
+
+    if ( ( dim_p = m_result->GetDimension( id ) ) )
+    {
+        throw ParseError( dim.GetMark().line, REDEFINED_DIM_ID.
+            arg( name ).arg( dim.GetMark().line ).arg( dim_p->Name() ) );
+    }
+
+    if ( ( unit_p = m_result->GetUnit( unit_name ) ) )
+    {
+        throw ParseError( dim.GetMark().line, REDEFINED_UNIT_NAME.
+            arg( unit_name ).arg( dim.GetMark().line ) );
+    }
+
+    dim_p = m_result->NewDimension( name, id );
+
+    unit_p = m_result->NewUnit( unit_name, dim_p );
+
+    dim_p->SetBaseUnit( unit_p );
 }
 
 //==============================================================================

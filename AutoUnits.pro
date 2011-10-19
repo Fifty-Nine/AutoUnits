@@ -1,10 +1,11 @@
 HEADERS += \
-    BaseUnit.h \
+    DefinitionParser.h \
     Dimension.h \
     Unit.h \
     UnitSystem.h \
 
 SOURCES += \
+    DefinitionParser.cpp \
     Dimension.cpp \
     Unit.cpp \
     UnitSystem.cpp \

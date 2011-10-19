@@ -18,5 +18,3 @@ OBJECTS_DIR = Objs/
 MOC_DIR = Mocs/
 UI_DIR = Uics/
 DESTDIR = Build/
-
-warning( $$TARGET_x )

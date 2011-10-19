@@ -23,7 +23,7 @@ public:
 private:
     Unit( const QString& name, Dimension *dimension_p );
 
-    friend class UnitsDefinition;
+    friend class UnitSystem;
 
     Dimension *m_dim_p;
 };

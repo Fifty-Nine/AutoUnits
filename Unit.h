@@ -35,7 +35,7 @@ public:
 private:
     Unit( const QString& name, Dimension *dimension_p );
 
-    friend class UnitsDefinition;
+    friend class UnitSystem;
 
     /// The unit's name.
     QString m_name;

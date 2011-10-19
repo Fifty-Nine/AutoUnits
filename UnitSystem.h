@@ -1,9 +1,9 @@
-#ifndef MATH_UNITS_AUTO_UNITS_UNITS_DEFINITION_H
-#define MATH_UNITS_AUTO_UNITS_UNITS_DEFINITION_H
+#ifndef MATH_UNITS_AUTO_UNITS_UNIT_SYSTEM_H
+#define MATH_UNITS_AUTO_UNITS_UNIT_SYSTEM_H
 //==============================================================================
-/// \file Math/Units/AutoUnits/UnitsDefinition.h
+/// \file Math/Units/AutoUnits/UnitSystem.h
 /// 
-/// Header file for the AutoUnits::UnitsDefinition class.
+/// Header file for the AutoUnits::UnitSystem class.
 ///
 //  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
@@ -25,11 +25,11 @@ typedef QHash<QString,int> DimensionId;
 //==============================================================================
 /// An object that defines a unit system.
 /// 
-class UnitsDefinition
+class UnitSystem
 {
 public:
-    ~UnitsDefinition();
-    static std::auto_ptr<UnitsDefinition> Create();
+    ~UnitSystem();
+    static std::auto_ptr<UnitSystem> Create();
 
     //==========================================================================
     /// Immutable interface.
@@ -53,7 +53,7 @@ public:
     Unit *GetUnit( const QString& name );
 
 private:
-    UnitsDefinition();
+    UnitSystem();
 
     /// Maps name -> dimension
     QHash<QString,Dimension*> m_dimensions;
@@ -64,4 +64,4 @@ private:
 
 } // namespace AutoUnits
 
-#endif // MATH_UNITS_AUTO_UNITS_UNITS_DEFINITION_H
+#endif // MATH_UNITS_AUTO_UNITS_UNIT_SYSTEM_H

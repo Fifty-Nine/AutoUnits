@@ -1,7 +1,7 @@
 //==============================================================================
-/// \file Math/Units/AutoUnits/UnitsDefinition.cpp
+/// \file Math/Units/AutoUnits/UnitSystem.cpp
 /// 
-/// Header file for the AutoUnits::UnitsDefinition class.
+/// Header file for the AutoUnits::UnitSystem class.
 ///
 //  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
@@ -10,7 +10,7 @@
 
 #include "Dimension.h"
 #include "Unit.h"
-#include "UnitsDefinition.h"
+#include "UnitSystem.h"
 
 namespace 
 {
@@ -35,7 +35,7 @@ namespace AutoUnits
 //==============================================================================
 /// Destructor.
 /// 
-UnitsDefinition::~UnitsDefinition()
+UnitSystem::~UnitSystem()
 {
     qDeleteAll( m_dimensions );
     qDeleteAll( m_units );
@@ -46,9 +46,9 @@ UnitsDefinition::~UnitsDefinition()
 /// 
 /// \return A pointer to the created system.
 ///
-std::auto_ptr<UnitsDefinition> UnitsDefinition::Create()
+std::auto_ptr<UnitSystem> UnitSystem::Create()
 {
-    return std::auto_ptr<UnitsDefinition>( new UnitsDefinition );
+    return std::auto_ptr<UnitSystem>( new UnitSystem );
 }
 
 
@@ -61,7 +61,7 @@ std::auto_ptr<UnitsDefinition> UnitsDefinition::Create()
 /// 
 /// \return The dimensions.
 /// 
-QList<const Dimension*> UnitsDefinition::Dimensions() const
+QList<const Dimension*> UnitSystem::Dimensions() const
 {
     QList<const Dimension*> result;
 
@@ -79,7 +79,7 @@ QList<const Dimension*> UnitsDefinition::Dimensions() const
 /// 
 /// \return The units.
 /// 
-QList<const Unit*> UnitsDefinition::Units() const
+QList<const Unit*> UnitSystem::Units() const
 {
     QList<const Unit*> result;
 
@@ -99,7 +99,7 @@ QList<const Unit*> UnitsDefinition::Units() const
 /// 
 /// \return The dimension, or NULL if not present.
 ///
-const Dimension *UnitsDefinition::GetDimension( const DimensionId& id ) const
+const Dimension *UnitSystem::GetDimension( const DimensionId& id ) const
 {
     for ( QHash<QString,Dimension*>::const_iterator it = m_dimensions.begin();
         it != m_dimensions.end(); ++it )
@@ -120,7 +120,7 @@ const Dimension *UnitsDefinition::GetDimension( const DimensionId& id ) const
 /// 
 /// \return The dimension, or NULL if not present.
 /// 
-const Dimension *UnitsDefinition::GetDimension( const QString& name ) const
+const Dimension *UnitSystem::GetDimension( const QString& name ) const
 {
     QHash<QString,Dimension*>::const_iterator it = 
         m_dimensions.find( NormalizeName( name ) );
@@ -135,7 +135,7 @@ const Dimension *UnitsDefinition::GetDimension( const QString& name ) const
 /// 
 /// \return The unit, or NULL if not present.
 /// 
-const Unit *UnitsDefinition::GetUnit( const QString& name ) const
+const Unit *UnitSystem::GetUnit( const QString& name ) const
 {
     QHash<QString,Unit*>::const_iterator it = 
         m_units.find( NormalizeName( name ) );
@@ -152,7 +152,7 @@ const Unit *UnitsDefinition::GetUnit( const QString& name ) const
 /// 
 /// \return The list of dimensions.
 /// 
-QList<Dimension*> UnitsDefinition::Dimensions()
+QList<Dimension*> UnitSystem::Dimensions()
 {
     return m_dimensions.values();
 }
@@ -165,7 +165,7 @@ QList<Dimension*> UnitsDefinition::Dimensions()
 /// 
 /// \return The dimension.
 /// 
-Dimension *UnitsDefinition::NewDimension( 
+Dimension *UnitSystem::NewDimension( 
     const QString& name, const DimensionId& id )
 {
     // \todo Throw exception.
@@ -186,7 +186,7 @@ Dimension *UnitsDefinition::NewDimension(
 /// 
 /// \return The dimension, or NULL if not present.
 /// 
-Dimension *UnitsDefinition::GetDimension( const QString& name )
+Dimension *UnitSystem::GetDimension( const QString& name )
 {
     QHash<QString,Dimension*>::const_iterator it = 
         m_dimensions.find( NormalizeName( name ) );
@@ -201,7 +201,7 @@ Dimension *UnitsDefinition::GetDimension( const QString& name )
 /// 
 /// \return The dimension, or NULL if not present.
 /// 
-Dimension *UnitsDefinition::GetDimension( const DimensionId& id )
+Dimension *UnitSystem::GetDimension( const DimensionId& id )
 {
     for ( QHash<QString,Dimension*>::const_iterator it = m_dimensions.begin(); 
         it != m_dimensions.end(); ++it )
@@ -220,7 +220,7 @@ Dimension *UnitsDefinition::GetDimension( const DimensionId& id )
 /// 
 /// \return The units.
 /// 
-QList<Unit*> UnitsDefinition::Units()
+QList<Unit*> UnitSystem::Units()
 {
     return m_units.values();
 }
@@ -233,7 +233,7 @@ QList<Unit*> UnitsDefinition::Units()
 /// 
 /// \return The new unit.
 /// 
-Unit *UnitsDefinition::NewUnit( const QString& name, Dimension *dim_p )
+Unit *UnitSystem::NewUnit( const QString& name, Dimension *dim_p )
 {
     assert( !GetUnit( name ) );
 
@@ -251,7 +251,7 @@ Unit *UnitsDefinition::NewUnit( const QString& name, Dimension *dim_p )
 /// 
 /// \return A pointer to the unit, or NULL if not present.
 /// 
-Unit *UnitsDefinition::GetUnit( const QString& name )
+Unit *UnitSystem::GetUnit( const QString& name )
 {
     QHash<QString,Unit*>::const_iterator it = 
         m_units.find( NormalizeName( name ) );
@@ -262,7 +262,7 @@ Unit *UnitsDefinition::GetUnit( const QString& name )
 //==============================================================================
 /// Constructor.
 /// 
-UnitsDefinition::UnitsDefinition()
+UnitSystem::UnitSystem()
 {
 }
 

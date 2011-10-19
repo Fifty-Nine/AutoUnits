@@ -2,10 +2,15 @@ HEADERS += \
     BaseUnit.h \
     Dimension.h \
     Unit.h \
-    UnitsDefinition.h \
+    UnitSystem.h \
 
 SOURCES += \
     Dimension.cpp \
     Unit.cpp \
-    UnitsDefinition.cpp \
+    UnitSystem.cpp \
+
+OBJECTS_DIR = Objs/
+MOC_DIR = Mocs/
+UI_DIR = Uics/
+
 

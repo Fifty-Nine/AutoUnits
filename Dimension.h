@@ -46,7 +46,7 @@ public:
 private:
     Dimension( const QString& name, const DimensionId& id );
 
-    friend class UnitsDefinition;
+    friend class UnitSystem;
 
     /// The name of the dimension.
     QString m_name;

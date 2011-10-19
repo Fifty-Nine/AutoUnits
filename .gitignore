@@ -1,5 +1,7 @@
-*.o
 AutoUnits
 Makefile
 cscope.out
 *.swp
+Build/
+Mocs/
+Objs/

@@ -1,3 +1,5 @@
+TEMPLATE = lib
+
 HEADERS += \
     DefinitionParser.h \
     Dimension.h \
@@ -10,8 +12,11 @@ SOURCES += \
     Unit.cpp \
     UnitSystem.cpp \
 
+LIBS += -lyaml-cpp
+
 OBJECTS_DIR = Objs/
 MOC_DIR = Mocs/
 UI_DIR = Uics/
+DESTDIR = Build/
 
-
+warning( $$TARGET_x )

@@ -30,16 +30,16 @@ public:
 
 private:
     void ParseFile( const QString& path );
-    void ParseDocument( YAML::Node& document );
+    void ParseDocument( const YAML::Node& document );
 
-    void ParseBaseDimensions( YAML::Node& dim_list );
-    void ParseBaseDimension( YAML::Node& dim );
+    void ParseBaseDimensions( const YAML::Node& dim_list );
+    void ParseBaseDimension( const YAML::Node& dim );
 
-    void ParseDerivedDimensions( YAML::Node& dim_list );
-    void ParseDerivedDimension( YAML::Node& dim );
+    void ParseDerivedDimensions( const YAML::Node& dim_list );
+    void ParseDerivedDimension( const YAML::Node& dim );
 
-    void ParseConvertedUnits( YAML::Node& unit_list );
-    void ParseConvertedUnit( YAML::Node& unit );
+    void ParseConvertedUnits( const YAML::Node& unit_list );
+    void ParseConvertedUnit( const YAML::Node& unit );
 
     /// The errors that were encountered in the parse.
     QList<ParseError> m_errors;

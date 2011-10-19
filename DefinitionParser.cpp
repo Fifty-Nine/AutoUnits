@@ -111,9 +111,11 @@ void DefinitionParser::ParseFile( const QString& path )
 /// 
 /// \param [in] document The document to parse.
 /// 
-void DefinitionParser::ParseDocument( YAML::Node& document )
+void DefinitionParser::ParseDocument( const YAML::Node& document )
 {
-    (void)document;
+    ParseBaseDimensions( document["BaseDimensions"] );
+    ParseDerivedDimensions( document["DerivedDimensions"] );
+    ParseConvertedUnits( document["ConvertedUnits"] );
 }
 
 //==============================================================================
@@ -121,9 +123,12 @@ void DefinitionParser::ParseDocument( YAML::Node& document )
 /// 
 /// \param [in] dim_list The YAML list node for the dimensions.
 /// 
-void DefinitionParser::ParseBaseDimensions( YAML::Node& dim_list )
+void DefinitionParser::ParseBaseDimensions( const YAML::Node& dim_list )
 {
-    (void)dim_list;
+    for ( YAML::Iterator it = dim_list.begin(); it != dim_list.end(); ++it )
+    {
+        ParseBaseDimension( *it );
+    }
 }
 
 //==============================================================================
@@ -131,7 +136,7 @@ void DefinitionParser::ParseBaseDimensions( YAML::Node& dim_list )
 /// 
 /// \param [in] dim The YAML map node for the dimension.
 /// 
-void DefinitionParser::ParseBaseDimension( YAML::Node& dim )
+void DefinitionParser::ParseBaseDimension( const YAML::Node& dim )
 {
     (void)dim;
 }
@@ -141,9 +146,12 @@ void DefinitionParser::ParseBaseDimension( YAML::Node& dim )
 /// 
 /// \param [in] dim_list The YAML list node for the dimensions.
 /// 
-void DefinitionParser::ParseDerivedDimensions( YAML::Node& dim_list )
+void DefinitionParser::ParseDerivedDimensions( const YAML::Node& dim_list )
 {
-    (void)dim_list;
+    for ( YAML::Iterator it = dim_list.begin(); it != dim_list.end(); ++it )
+    {
+        ParseDerivedDimension( *it );
+    }
 }
 
 //==============================================================================
@@ -151,7 +159,7 @@ void DefinitionParser::ParseDerivedDimensions( YAML::Node& dim_list )
 /// 
 /// \param [in] dim The YAML map node for the dimension.
 /// 
-void DefinitionParser::ParseDerivedDimension( YAML::Node& dim )
+void DefinitionParser::ParseDerivedDimension( const YAML::Node& dim )
 {
     (void)dim;
 }
@@ -161,9 +169,12 @@ void DefinitionParser::ParseDerivedDimension( YAML::Node& dim )
 /// 
 /// \param [in] unit_list The list of converted units.
 /// 
-void DefinitionParser::ParseConvertedUnits( YAML::Node& unit_list )
+void DefinitionParser::ParseConvertedUnits( const YAML::Node& unit_list )
 {
-    (void)unit_list;
+    for ( YAML::Iterator it = unit_list.begin(); it != unit_list.end(); ++it )
+    {
+        ParseConvertedUnit( *it );
+    }
 }
 
 //==============================================================================
@@ -171,7 +182,7 @@ void DefinitionParser::ParseConvertedUnits( YAML::Node& unit_list )
 /// 
 /// \param [in] unit The YAML map node for the unit.
 /// 
-void DefinitionParser::ParseConvertedUnit( YAML::Node& unit )
+void DefinitionParser::ParseConvertedUnit( const YAML::Node& unit )
 {
     (void)unit;
 }

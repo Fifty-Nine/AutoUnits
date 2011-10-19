@@ -8,7 +8,12 @@
 //  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
 
+#include <memory>
+
 #include <QList>
+#include <QString>
+
+namespace YAML { class Node; }
 
 namespace AutoUnits
 {
@@ -66,7 +71,7 @@ public:
     operator QString() const;
 
     /// The line number.
-    int line;
+    int m_line;
     /// The error description.
     QString m_desc;
 };

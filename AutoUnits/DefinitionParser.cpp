@@ -233,5 +233,27 @@ void DefinitionParser::ParseConvertedUnit( const YAML::Node& unit )
     (void)unit;
 }
 
+//==============================================================================
+/// Constructor.
+/// 
+/// \param [in] line The line number.
+/// \param [in] description The description of the error.
+/// 
+ParseError::ParseError( int line, const QString& description ) : 
+    m_line( line ), m_desc( description )
+{
+}
+
+//==============================================================================
+/// Convert the error to a QString.
+/// 
+/// \return A string representation of the error.
+/// 
+ParseError::operator QString() const
+{
+    static const QString FORMAT = "%1:%2";
+    return FORMAT.arg( m_line ).arg( m_desc );
+}
+
 } // namespace AutoUnits
 

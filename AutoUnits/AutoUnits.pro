@@ -14,7 +14,7 @@ SOURCES += \
 
 LIBS += -lyaml-cpp
 
-OBJECTS_DIR = Objs/
-MOC_DIR = Mocs/
-UI_DIR = Uics/
 DESTDIR = Build/
+OBJECTS_DIR = $$DESTDIR/Objs/
+MOC_DIR = $$DESTDIR/Mocs/
+UI_DIR = $$DESTDIR/Uics/

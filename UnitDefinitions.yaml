@@ -18,7 +18,11 @@ DerivedDimensions:
   
   - name: Area
     unit: MeterSquared
-    derivation: Meter * Meter
+    derivation: Meter^2
+
+  - name: Acceleration
+    unit: MetersPerSecondSquared
+    derivation: Meters / (Second^2)
 
 ConvertedUnits:
   - name: Pound

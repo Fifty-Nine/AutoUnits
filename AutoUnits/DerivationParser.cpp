@@ -6,6 +6,9 @@
 //  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
 
+#include <cassert>
+#include <limits>
+
 #include <QQueue>
 #include <QSet>
 #include <QStack>
@@ -38,12 +41,19 @@ public:
 class Operator : public Token
 {
 public:
+    /// Apply the operator to the values on the stack.
+    //
+    /// param [in] ids The values.
+    virtual void Apply( QStack<DimensionId>& ids ) = 0;
+    virtual bool IsLParen() const { return false; }
+};
+
+class BinaryOperator : public Operator
+{
+public:
     /// Get the precedence of the operator.
     /// \return The precedence.
     virtual int Precedence() const = 0;
-    /// Apply the operator to the values on the stack.
-    /// param [in] ids The values.
-    virtual void Apply( QStack<DimensionId>& ids ) = 0;
 
     enum Associativity
     {
@@ -62,7 +72,8 @@ public:
     {
         while ( !state.opstack.isEmpty() )
         {
-            Operator *other_p = state.opstack.top();
+            BinaryOperator *other_p = 
+                static_cast<BinaryOperator*>( state.opstack.top() );
             if ( ( ( GetAssociativity() == Left ) &&
                 ( Precedence() <= other_p->Precedence() ) ) ||
                 ( ( GetAssociativity() == Right ) &&
@@ -78,7 +89,41 @@ public:
     }
 };
 
-class Multiplication : public Operator
+class LParen : public Operator
+{
+    virtual bool IsLParen() const { return true; }
+    virtual int Precedence() const { return std::numeric_limits<int>::max(); }
+    virtual void Process( ParserState& state )
+    {
+        state.opstack.push( this );
+    }
+
+    virtual void Apply( QStack<DimensionId>& ) { }
+};
+
+class RParen : public Operator
+{
+    virtual void Process( ParserState& state )
+    {
+        assert( !state.opstack.isEmpty() );
+        
+        bool saw_lparen = false;
+        while ( !saw_lparen && !state.opstack.isEmpty() )
+        {
+            Operator *op_p = state.opstack.pop();
+            op_p->Apply( state.idstack );
+
+            saw_lparen = op_p->IsLParen();
+            delete op_p;
+        }
+
+        delete this;
+    }
+    
+    virtual void Apply( QStack<DimensionId>& ) { assert( false ); }
+};
+
+class Multiplication : public BinaryOperator
 {
 public:
     virtual int Precedence() const { return 1; }
@@ -101,7 +146,7 @@ public:
     }
 };
 
-class Division : public Operator
+class Division : public BinaryOperator
 {
 public:
     virtual int Precedence() const { return 1; }
@@ -177,16 +222,20 @@ QQueue<Token*> ParseTokens( const QString& str )
             result.enqueue( new Division );
             i++;
         }
+        else if ( str[i] == '(' )
+        {
+            result.enqueue( new LParen );
+            i++;
+        }
+        else if ( str[i] == ')' )
+        {
+            result.enqueue( new RParen );
+            i++;
+        }
         else if ( str[i] == '1' )
         {
             result.enqueue( new Identifier( "1" ) );
             i++;
-            
-            if ( i < str.count() && str[i] == '.' )
-            {
-                i++;
-                if ( i < str.count() && str[i] == '0' ) i++;
-            }
         }
         else if ( str[i].isLetter() )
         {
@@ -234,8 +283,12 @@ DimensionId ParseDerivation( const QString& str )
 
     while ( !state.opstack.isEmpty() )
     {
-        state.opstack.pop()->Process( state );
+        Operator *op_p = state.opstack.pop();
+        op_p->Apply( state.idstack );
+        delete op_p;
     }
+
+    assert( state.idstack.count() == 1 );
 
     qDeleteAll( state.opstack );
 

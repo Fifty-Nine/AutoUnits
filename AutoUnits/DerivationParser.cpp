@@ -22,29 +22,57 @@ namespace
 {
 
 class Token;
+class Value;
 class Operator;
 
 struct ParserState
 {
 public:
     QQueue<Token*> tokens;
-    QStack<DimensionId> idstack;
+    QStack<Value*> argstack;
     QStack<Operator*> opstack;
 };
 
 class Token
 {
 public:
+    virtual ~Token() { }
     virtual void Process( ParserState& state ) = 0;
 };
 
+class Value : public Token
+{
+public:
+    Value( const DimensionId& id ) : m_id( id ), m_scalar( -1 ) { }
+    Value( int scalar ) : m_id( DimensionId() ), m_scalar( scalar ) { }
+
+    virtual bool IsInteger() const { return m_scalar >= 0; }
+    DimensionId GetId() const
+    {
+        return m_id;
+    }
+
+    int GetScalar() const
+    {
+        assert( IsInteger() );
+        return m_scalar;
+    }
+
+    virtual void Process( ParserState& state )
+    {
+        state.argstack.push( this );
+    }
+
+    DimensionId m_id;
+    int m_scalar;
+};
 class Operator : public Token
 {
 public:
     /// Apply the operator to the values on the stack.
     //
     /// param [in] ids The values.
-    virtual void Apply( QStack<DimensionId>& ids ) = 0;
+    virtual void Apply( QStack<Value*>& ids ) = 0;
     virtual bool IsLParen() const { return false; }
 };
 
@@ -55,17 +83,6 @@ public:
     /// \return The precedence.
     virtual int Precedence() const = 0;
 
-    enum Associativity
-    {
-        Left,
-        Right
-    };
-
-    virtual Associativity GetAssociativity() const
-    {
-        return Left;
-    }
-
     /// Process the operator.
     /// \param [in] state The current parser state.
     virtual void Process( ParserState& state )
@@ -74,14 +91,15 @@ public:
         {
             BinaryOperator *other_p = 
                 static_cast<BinaryOperator*>( state.opstack.top() );
-            if ( ( ( GetAssociativity() == Left ) &&
-                ( Precedence() <= other_p->Precedence() ) ) ||
-                ( ( GetAssociativity() == Right ) &&
-                ( Precedence() < other_p->Precedence() ) ) )
+            if ( Precedence() <= other_p->Precedence() )
             {
                 state.opstack.pop();
-                other_p->Apply( state.idstack );
+                other_p->Apply( state.argstack );
                 delete other_p;
+            }
+            else
+            {
+                break;
             }
         }
 
@@ -98,7 +116,7 @@ class LParen : public Operator
         state.opstack.push( this );
     }
 
-    virtual void Apply( QStack<DimensionId>& ) { }
+    virtual void Apply( QStack<Value*>& ) { }
 };
 
 class RParen : public Operator
@@ -111,7 +129,7 @@ class RParen : public Operator
         while ( !saw_lparen && !state.opstack.isEmpty() )
         {
             Operator *op_p = state.opstack.pop();
-            op_p->Apply( state.idstack );
+            op_p->Apply( state.argstack );
 
             saw_lparen = op_p->IsLParen();
             delete op_p;
@@ -120,17 +138,24 @@ class RParen : public Operator
         delete this;
     }
     
-    virtual void Apply( QStack<DimensionId>& ) { assert( false ); }
+    virtual void Apply( QStack<Value*>& ) { assert( false ); }
 };
 
 class Multiplication : public BinaryOperator
 {
 public:
     virtual int Precedence() const { return 1; }
-    virtual void Apply( QStack<DimensionId>& stack )
+    virtual void Apply( QStack<Value*>& stack )
     {
-        DimensionId rhs = stack.pop();
-        DimensionId lhs = stack.pop();
+        Value *rhs_p = stack.pop();
+        Value *lhs_p = stack.pop();
+
+        DimensionId lhs = lhs_p->GetId();
+        DimensionId rhs = rhs_p->GetId();
+
+        delete lhs_p;
+        delete rhs_p;
+
         DimensionId result;
 
         QSet<QString> keys( lhs.keys().toSet() );
@@ -142,7 +167,7 @@ public:
             result[*it] = ( lhs[*it] + rhs[*it] );
         }
 
-        stack.push( result );
+        stack.push( new Value( result ) );
     }
 };
 
@@ -150,12 +175,18 @@ class Division : public BinaryOperator
 {
 public:
     virtual int Precedence() const { return 1; }
-    virtual void Apply( QStack<DimensionId>& stack )
+    virtual void Apply( QStack<Value*>& stack )
     {
-        DimensionId rhs = stack.pop();
-        DimensionId lhs = stack.pop();
-        DimensionId result;
+        Value *rhs_p = stack.pop();
+        Value *lhs_p = stack.pop();
 
+        DimensionId lhs = lhs_p->GetId();
+        DimensionId rhs = rhs_p->GetId();
+
+        delete lhs_p;
+        delete rhs_p;
+
+        DimensionId result;
         QSet<QString> keys( lhs.keys().toSet() );
         keys.unite( rhs.keys().toSet() );
 
@@ -165,33 +196,38 @@ public:
             result[*it] = ( lhs[*it] - rhs[*it] );
         }
 
-        stack.push( result );
+        stack.push( new Value( result ) );
     }
 };
 
-class Identifier : public Token
+class Exponentiation : public BinaryOperator
 {
 public:
-    Identifier( const QString& text ) : m_text( text ) { }
-    DimensionId GetId() const
+    virtual int Precedence() const { return 2; }
+    virtual void Apply( QStack<Value*>& stack )
     {
+        Value *rhs_p = stack.pop();
+        Value *lhs_p = stack.pop();
+
+        DimensionId lhs = lhs_p->GetId();
+
+        assert( rhs_p->IsInteger() );
+        int rhs = rhs_p->GetScalar();
+
+        delete lhs_p;
+        delete rhs_p;
+
         DimensionId result;
 
-        if ( m_text != "1" )
+        QSet<QString> keys = lhs.keys().toSet();
+        for ( DimensionId::const_iterator it = lhs.begin(); 
+            it != lhs.end(); ++it )
         {
-            result[m_text] = 1;
+            result[it.key()] = ( it.value() * rhs );
         }
 
-        return result;
+        stack.push( new Value( result ) );
     }
-
-    virtual void Process( ParserState& state )
-    {
-        state.idstack.push( GetId() );
-        delete this;
-    }
-
-    QString m_text;
 };
 
 //==============================================================================
@@ -209,7 +245,7 @@ QQueue<Token*> ParseTokens( const QString& str )
     {
         if ( str[i] == '^' )
         {
-            /// \todo 
+            result.enqueue( new Exponentiation );
             i++;
         }
         else if ( str[i] == '*' )
@@ -232,20 +268,27 @@ QQueue<Token*> ParseTokens( const QString& str )
             result.enqueue( new RParen );
             i++;
         }
-        else if ( str[i] == '1' )
+        else if ( str[i].isDigit() )
         {
-            result.enqueue( new Identifier( "1" ) );
-            i++;
+            QString num_text = "";
+            while ( i < str.count() && str[i].isDigit() )
+            {
+                num_text += str[i++];
+            }
+
+            result.enqueue( new Value( num_text.toInt() ) );
         }
         else if ( str[i].isLetter() )
         {
-            QString id = "";
+            QString id_text = "";
             while ( i < str.count() && str[i].isLetterOrNumber() )
             {
-                id += str[i++];
+                id_text += str[i++];
             }
 
-            result.enqueue( new Identifier( id ) );
+            DimensionId id;
+            id[id_text] = 1;
+            result.enqueue( new Value( id ) );
         }
         else if ( str[i].isSpace() )
         {
@@ -284,15 +327,18 @@ DimensionId ParseDerivation( const QString& str )
     while ( !state.opstack.isEmpty() )
     {
         Operator *op_p = state.opstack.pop();
-        op_p->Apply( state.idstack );
+        op_p->Apply( state.argstack );
         delete op_p;
     }
 
-    assert( state.idstack.count() == 1 );
+    assert( state.argstack.count() == 1 );
 
+    DimensionId result = state.argstack.top()->GetId();
+
+    qDeleteAll( state.argstack );
     qDeleteAll( state.opstack );
 
-    return state.idstack.top();
+    return result;
 }
 
 } // namespace AutoUnits

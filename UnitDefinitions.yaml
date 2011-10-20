@@ -12,6 +12,10 @@ BaseDimensions:
     name: Temperature
 
 DerivedDimensions:
+  - name: Scalar
+    unit: Null
+    derivation: 1
+
   - name: Speed
     unit: MetersPerSecond
     derivation: Meters / Second
@@ -22,7 +26,11 @@ DerivedDimensions:
 
   - name: Acceleration
     unit: MetersPerSecondSquared
-    derivation: Meters / (Second^2)
+    derivation: Meters / Second^2
+
+  - name: Frequency
+    unit: Hertz
+    derivation: 1 / Second
 
 ConvertedUnits:
   - name: Pound

@@ -6,12 +6,17 @@
 //  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
 
+#include <QDebug>
+
 #include <fstream>
 #include <yaml-cpp/yaml.h>
 
 #include <QFileInfo>
+#include <QStack>
+#include <QStringList>
 
 #include "DefinitionParser.h"
+#include "DerivationParser.h"
 #include "Dimension.h"
 #include "QtYaml.h"
 #include "UnitSystem.h"
@@ -31,26 +36,6 @@ QString REDEFINED_UNIT_NAME = "Redefinition of unit \"%1\" on line %2.";
 
 namespace AutoUnits
 {
-
-namespace
-{
-
-//==============================================================================
-/// Parse a derived dimension derivation string.
-/// 
-/// \param [in] str The derivation.
-/// 
-/// \return The dimension ID.
-/// 
-DimensionId ParseDerivation( const QString& str )
-{
-    /// \todo Make this actually work.
-    DimensionId result;
-    result[str] = 1;
-    return result;
-}
-
-} // namespace
 
 //==============================================================================
 /// Constructor.

@@ -2,12 +2,14 @@ TEMPLATE = lib
 
 HEADERS += \
     DefinitionParser.h \
+    DerivationParser.h \
     Dimension.h \
     Unit.h \
     UnitSystem.h \
 
 SOURCES += \
     DefinitionParser.cpp \
+    DerivationParser.cpp \
     Dimension.cpp \
     Unit.cpp \
     UnitSystem.cpp \

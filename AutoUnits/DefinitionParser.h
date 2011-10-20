@@ -13,12 +13,20 @@
 #include <QList>
 #include <QString>
 
-namespace YAML { class Node; }
+#include "Types/DimensionId.h"
+
+namespace YAML 
+{ 
+    class Node; 
+    class Mark;
+}
 
 namespace AutoUnits
 {
 
+class Dimension;
 class ParseError;
+class Unit;
 class UnitSystem;
 
 //==============================================================================
@@ -45,6 +53,11 @@ private:
 
     void ParseConvertedUnits( const YAML::Node& unit_list );
     void ParseConvertedUnit( const YAML::Node& unit );
+
+    Dimension *DefineDimension( const YAML::Mark& mark, const QString& dim_name,
+        const DimensionId& id, const QString& name );
+    Unit *DefineUnit( 
+        const YAML::Mark& mark, const QString& name, Dimension *dim_p );
 
     /// The errors that were encountered in the parse.
     QList<ParseError> m_errors;

@@ -12,6 +12,8 @@ SOURCES += \
     Unit.cpp \
     UnitSystem.cpp \
 
+include( Types/Types.pri )
+
 LIBS += -lyaml-cpp
 
 DESTDIR = Build/

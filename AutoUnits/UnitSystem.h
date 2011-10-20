@@ -12,15 +12,13 @@
 #include <QHash>
 #include <QString>
 
+#include "Types/DimensionId.h"
+
 namespace AutoUnits
 {
 
 class Unit;
 class Dimension;
-
-/// Uniquely identifies a dimension as a list of (Base unit, power) pairs.
-/// For instance, acceleration would be [(Meter,1), (Second,-2)]
-typedef QHash<QString,int> DimensionId;
 
 //==============================================================================
 /// An object that defines a unit system.

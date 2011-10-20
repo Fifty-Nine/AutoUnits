@@ -24,6 +24,7 @@ QString WARNING_FORMAT = "%1:%2: warning: %3";
 QString REDEFINED_DIM_NAME = "Redefinition of dimension \"%1\" on line %2.";
 QString REDEFINED_DIM_ID = "Definition of dimension \"%1\" on line %2 conflicts"
                            " with definition of dimension \"%3\".";
+QString UNDEFINED_DIM_NAME = "Unknown dimension \"%1\" near line %2.";
 QString REDEFINED_UNIT_NAME = "Redefinition of unit \"%1\" on line %2.";
 
 }
@@ -43,8 +44,10 @@ namespace
 /// 
 DimensionId ParseDerivation( const QString& str )
 {
-    (void)str;
-    return DimensionId();
+    /// \todo Make this actually work.
+    DimensionId result;
+    result[str] = 1;
+    return result;
 }
 
 } // namespace
@@ -167,32 +170,7 @@ void DefinitionParser::ParseBaseDimension( const YAML::Node& dim )
     DimensionId id;
     id[unit_name] = 1;
 
-    Dimension *dim_p;
-    Unit *unit_p;
-
-    if ( ( dim_p = m_result->GetDimension( name ) ) )
-    {
-        throw ParseError( m_file, dim.GetMark().line, 
-            REDEFINED_DIM_NAME.arg( name ).arg( dim.GetMark().line ) );
-    }
-
-    if ( ( dim_p = m_result->GetDimension( id ) ) )
-    {
-        throw ParseError( m_file, dim.GetMark().line, REDEFINED_DIM_ID.
-            arg( name ).arg( dim.GetMark().line ).arg( dim_p->Name() ) );
-    }
-
-    if ( ( unit_p = m_result->GetUnit( unit_name ) ) )
-    {
-        throw ParseError( m_file, dim.GetMark().line, REDEFINED_UNIT_NAME.
-            arg( unit_name ).arg( dim.GetMark().line ) );
-    }
-
-    dim_p = m_result->NewDimension( name, id );
-
-    unit_p = m_result->NewUnit( unit_name, dim_p );
-
-    dim_p->SetBaseUnit( unit_p );
+    (void)DefineDimension( dim.GetMark(), name, id, unit_name );
 }
 
 //==============================================================================
@@ -215,7 +193,16 @@ void DefinitionParser::ParseDerivedDimensions( const YAML::Node& dim_list )
 /// 
 void DefinitionParser::ParseDerivedDimension( const YAML::Node& dim )
 {
-    (void)dim;
+    QString name;
+    dim["name"] >> name;
+    QString unit_name;
+    dim["unit"] >> unit_name;
+    QString derivation;
+    dim["derivation"] >> derivation;
+
+    DimensionId id = ParseDerivation( derivation );
+
+    (void)DefineDimension( dim.GetMark(), name, id, unit_name );
 }
 
 //==============================================================================
@@ -238,7 +225,79 @@ void DefinitionParser::ParseConvertedUnits( const YAML::Node& unit_list )
 /// 
 void DefinitionParser::ParseConvertedUnit( const YAML::Node& unit )
 {
-    (void)unit;
+    QString name;
+    unit["name"] >> name;
+    QString base_unit_name;
+
+    const YAML::Node& dim_node( unit["dimension"] );
+    QString dim_name;
+    dim_node >> dim_name;
+
+    QString conversion;
+    unit["conversion"] >> conversion;
+
+    Dimension *dim_p = m_result->GetDimension( dim_name );
+
+    if ( !dim_p )
+    {
+        const YAML::Mark& mark( dim_node.GetMark() );
+        throw ParseError( m_file, mark.line,
+            UNDEFINED_DIM_NAME.arg( dim_name ).arg( mark.line ) );
+    }
+
+    (void)DefineUnit( unit.GetMark(), name, dim_p );
+}
+
+//==============================================================================
+/// Define a new dimension with the given parameters, throwing appropriate
+/// errors when encountered.
+/// 
+Dimension *DefinitionParser::DefineDimension( const YAML::Mark& mark, 
+    const QString& dim_name, const DimensionId& dim_id, 
+    const QString& unit_name )
+{
+    Dimension *dim_p;
+    Unit *unit_p;
+
+    if ( ( dim_p = m_result->GetDimension( dim_name ) ) )
+    {
+        throw ParseError( m_file, mark.line, 
+            REDEFINED_DIM_NAME.arg( dim_name ).arg( mark.line ) );
+    }
+
+    if ( ( dim_p = m_result->GetDimension( dim_id ) ) )
+    {
+        throw ParseError( m_file, mark.line, REDEFINED_DIM_ID.
+            arg( dim_name ).arg( mark.line ).arg( dim_p->Name() ) );
+    }
+
+    dim_p = m_result->NewDimension( dim_name, dim_id );
+
+    unit_p = DefineUnit( mark, unit_name, dim_p );
+
+    dim_p->SetBaseUnit( unit_p );
+
+    return dim_p;
+}
+
+//==============================================================================
+/// Define a new unit with the given parameters, throwing appropriate
+/// errors when encountered.
+/// 
+Unit *DefinitionParser::DefineUnit( const YAML::Mark& mark, 
+    const QString& name, Dimension *dim_p )
+{
+    Unit *unit_p = m_result->GetUnit( name );
+
+    if ( unit_p )
+    {
+        throw ParseError( m_file, mark.line, REDEFINED_UNIT_NAME.
+            arg( name ).arg( mark.line ) );
+    }
+
+    unit_p = m_result->NewUnit( name, dim_p );
+
+    return unit_p;
 }
 
 //==============================================================================

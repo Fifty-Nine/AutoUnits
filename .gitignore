@@ -5,3 +5,4 @@ cscope.out
 Build/
 Mocs/
 Objs/
+Overrides.pri

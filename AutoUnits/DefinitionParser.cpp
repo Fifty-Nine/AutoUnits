@@ -21,7 +21,7 @@ namespace
 
 QString REDEFINED_DIM_NAME = "Redefinition of dimension \"%1\" on line %2.";
 QString REDEFINED_DIM_ID = "Definition of dimension \"%1\" on line %2 conflicts"
-                           "with definition of dimension \"%3\".";
+                           " with definition of dimension \"%3\".";
 QString REDEFINED_UNIT_NAME = "Redefinition of unit \"%1\" on line %2.";
 
 }
@@ -59,6 +59,11 @@ DefinitionParser::DefinitionParser( const QString& path )
     try
     {
         ParseFile( path );
+    }
+    catch ( ParseError& err )
+    {
+        m_errors.append( err );
+        m_result.reset();
     }
     catch ( YAML::Exception& ex )
     {

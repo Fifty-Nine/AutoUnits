@@ -19,6 +19,8 @@
 namespace
 {
 
+QString ERROR_FORMAT = "%1:%2: error: %3";
+QString WARNING_FORMAT = "%1:%2: warning: %3";
 QString REDEFINED_DIM_NAME = "Redefinition of dimension \"%1\" on line %2.";
 QString REDEFINED_DIM_ID = "Definition of dimension \"%1\" on line %2 conflicts"
                            " with definition of dimension \"%3\".";
@@ -52,13 +54,14 @@ DimensionId ParseDerivation( const QString& str )
 /// 
 /// \param [in] path The path to the file.
 /// 
-DefinitionParser::DefinitionParser( const QString& path )
+DefinitionParser::DefinitionParser( const QString& path ) : 
+    m_file( path )
 {
     m_result = UnitSystem::Create();
 
     try
     {
-        ParseFile( path );
+        ParseFile();
     }
     catch ( ParseError& err )
     {
@@ -67,7 +70,7 @@ DefinitionParser::DefinitionParser( const QString& path )
     }
     catch ( YAML::Exception& ex )
     {
-        m_errors.append( ParseError( ex.mark.line, ex.what() ) );
+        m_errors.append( ParseError( m_file, ex.mark.line, ex.what() ) );
         m_result.reset();
     }
 }
@@ -106,9 +109,9 @@ QList<ParseError> DefinitionParser::Errors() const
 /// \param [in] path The path to the file.
 /// 
 /// 
-void DefinitionParser::ParseFile( const QString& path )
+void DefinitionParser::ParseFile()
 {
-    std::ifstream in( qPrintable( path ) );
+    std::ifstream in( qPrintable( m_file ) );
     YAML::Parser parser( in );
 
     YAML::Node document;
@@ -169,19 +172,19 @@ void DefinitionParser::ParseBaseDimension( const YAML::Node& dim )
 
     if ( ( dim_p = m_result->GetDimension( name ) ) )
     {
-        throw ParseError( dim.GetMark().line, 
+        throw ParseError( m_file, dim.GetMark().line, 
             REDEFINED_DIM_NAME.arg( name ).arg( dim.GetMark().line ) );
     }
 
     if ( ( dim_p = m_result->GetDimension( id ) ) )
     {
-        throw ParseError( dim.GetMark().line, REDEFINED_DIM_ID.
+        throw ParseError( m_file, dim.GetMark().line, REDEFINED_DIM_ID.
             arg( name ).arg( dim.GetMark().line ).arg( dim_p->Name() ) );
     }
 
     if ( ( unit_p = m_result->GetUnit( unit_name ) ) )
     {
-        throw ParseError( dim.GetMark().line, REDEFINED_UNIT_NAME.
+        throw ParseError( m_file, dim.GetMark().line, REDEFINED_UNIT_NAME.
             arg( unit_name ).arg( dim.GetMark().line ) );
     }
 
@@ -244,8 +247,9 @@ void DefinitionParser::ParseConvertedUnit( const YAML::Node& unit )
 /// \param [in] line The line number.
 /// \param [in] description The description of the error.
 /// 
-ParseError::ParseError( int line, const QString& description ) : 
-    m_line( line ), m_desc( description )
+ParseError::ParseError( const QString& file, int line, 
+    const QString& description, ErrorType type ) : 
+    m_file( file ), m_line( line ), m_desc( description ), m_error_type( type )
 {
 }
 
@@ -256,8 +260,8 @@ ParseError::ParseError( int line, const QString& description ) :
 /// 
 ParseError::operator QString() const
 {
-    static const QString FORMAT = "%1:%2";
-    return FORMAT.arg( m_line ).arg( m_desc );
+    QString format = ( m_error_type == Error ) ? ERROR_FORMAT : WARNING_FORMAT;
+    return ERROR_FORMAT.arg( m_file ).arg( m_line ).arg( m_desc );
 }
 
 } // namespace AutoUnits

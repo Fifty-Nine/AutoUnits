@@ -34,7 +34,7 @@ public:
     QList<ParseError> Errors() const;
 
 private:
-    void ParseFile( const QString& path );
+    void ParseFile();
     void ParseDocument( const YAML::Node& document );
 
     void ParseBaseDimensions( const YAML::Node& dim_list );
@@ -52,6 +52,9 @@ private:
     /// The result of the parse.
     std::auto_ptr<UnitSystem> m_result;
 
+    /// The name of the file being parsed.
+    QString m_file;
+
     /// Not implemented.
     DefinitionParser();
     /// Not implemented.
@@ -66,14 +69,25 @@ private:
 class ParseError
 {
 public:
-    ParseError( int line, const QString& description );
+    enum ErrorType
+    {
+        Error,
+        Warning
+    };
+
+    ParseError( const QString& file, int line, const QString& description, 
+        ErrorType error_type = Error );
 
     operator QString() const;
 
+    /// The file path.
+    QString m_file;
     /// The line number.
     int m_line;
     /// The error description.
     QString m_desc;
+    /// The error type.
+    ErrorType m_error_type;
 };
 
 } // namespace AutoUnits

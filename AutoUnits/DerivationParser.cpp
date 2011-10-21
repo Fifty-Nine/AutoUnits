@@ -8,6 +8,7 @@
 
 #include <cassert>
 #include <limits>
+#include <memory>
 
 #include <QQueue>
 #include <QSet>
@@ -28,6 +29,12 @@ class Operator;
 struct ParserState
 {
 public:
+    ~ParserState()
+    {
+        qDeleteAll( tokens );
+        qDeleteAll( argstack );
+        qDeleteAll( opstack );
+    }
     QQueue<Token*> tokens;
     QStack<Value*> argstack;
     QStack<Operator*> opstack;
@@ -320,25 +327,20 @@ DimensionId ParseDerivation( const QString& str )
 
     while ( !state.tokens.isEmpty() )
     {
-        Token *tok_p = state.tokens.dequeue();
+        std::auto_ptr<Token> tok_p( state.tokens.dequeue() );
         tok_p->Process( state );
+        tok_p.release();
     }
 
     while ( !state.opstack.isEmpty() )
     {
-        Operator *op_p = state.opstack.pop();
+        std::auto_ptr<Operator> op_p( state.opstack.pop() );
         op_p->Apply( state.argstack );
-        delete op_p;
     }
 
     assert( state.argstack.count() == 1 );
 
-    DimensionId result = state.argstack.top()->GetId();
-
-    qDeleteAll( state.argstack );
-    qDeleteAll( state.opstack );
-
-    return result;
+    return state.argstack.top()->GetId();
 }
 
 } // namespace AutoUnits

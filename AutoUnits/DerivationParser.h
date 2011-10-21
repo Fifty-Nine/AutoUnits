@@ -13,19 +13,6 @@
 namespace AutoUnits
 {
 
-//==============================================================================
-/// Error thrown when a problem is encountered in a derivation.
-/// 
-class DerivationError
-{
-public:
-    DerivationError( const QString& description );
-
-    operator QString() const;
-
-    const QString m_desc;
-};
-
 DimensionId ParseDerivation( const QString& str );
 
 } // namespace AutoUnits

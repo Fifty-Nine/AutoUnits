@@ -21,6 +21,7 @@ SOURCES += \
     UnitSystem.cpp \
 
 include( Types/Types.pri )
+include( Util/Util.pri )
 
 LIBS += -lyaml-cpp
 

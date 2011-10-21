@@ -10,11 +10,11 @@
 #include <limits>
 #include <memory>
 
-#include <QQueue>
 #include <QSet>
-#include <QStack>
 
 #include "DerivationParser.h"
+#include "Util/Error.h"
+#include "Util/ExprParser.h"
 
 namespace AutoUnits
 {
@@ -22,41 +22,42 @@ namespace AutoUnits
 namespace 
 {
 
-class Token;
+using namespace Util;
 class Value;
-class Operator;
 
-struct ParserState
+QQueue<Token*> ParseTokens( const QString& str );
+
+//==============================================================================
+/// The state for the derivation parser.
+///
+class DerivationParserState : public Util::ParserState
 {
 public:
-    ~ParserState()
+    //==========================================================================
+    /// Constructor.
+    /// 
+    /// \param [in] str The string being parsed.
+    /// 
+    DerivationParserState( const QString& str ) 
     {
-        qDeleteAll( tokens );
-        qDeleteAll( argstack );
-        qDeleteAll( opstack );
+        tokens = ParseTokens( str );
     }
-    QQueue<Token*> tokens;
+
+    //==========================================================================
+    /// Destructor.
+    /// 
+    virtual ~DerivationParserState()
+    {
+        qDeleteAll( argstack );
+    }
+
+    /// The output stack.
     QStack<Value*> argstack;
-    QStack<Operator*> opstack;
 };
 
-class Token
-{
-public:
-    virtual ~Token() { }
-
-    /// Do whatever needs to be done to process the token with the given parser
-    /// state. 
-    /// 
-    /// \param [in] state The parser state.
-    /// 
-    /// \note The token takes ownership of itself for the lifetime of this
-    /// function. In other words, the token either needs to be deleted or
-    /// pushed onto one of the stacks before the function exits. 
-    /// 
-    virtual void Process( ParserState& state ) = 0;
-};
-
+//==============================================================================
+/// Represents a value in the input.
+/// 
 class Value : public Token
 {
 public:
@@ -77,110 +78,37 @@ public:
 
     virtual void Process( ParserState& state )
     {
-        state.argstack.push( this );
+        DerivationParserState& derived( 
+            static_cast<DerivationParserState&>( state ) );
+        derived.argstack.push( this );
     }
 
     DimensionId m_id;
     int m_scalar;
 };
-class Operator : public Token
-{
-public:
-    /// Apply the operator to the values on the stack.
-    //
-    /// param [in] ids The values.
-    virtual void Apply( QStack<Value*>& ids ) = 0;
-    /// Get the precedence of the operator.
-    /// \return The precedence.
-    virtual int Precedence() const = 0;
-    virtual bool IsLParen() const { return false; }
-};
 
-class BinaryOperator : public Operator
-{
-public:
-    /// Process the operator.
-    /// \param [in] state The current parser state.
-    virtual void Process( ParserState& state )
-    {
-        std::auto_ptr<BinaryOperator> guard( this );
-        while ( !state.opstack.isEmpty() )
-        {
-            std::auto_ptr<Operator> other_p( state.opstack.top() );
-            if ( Precedence() <= other_p->Precedence() )
-            {
-                state.opstack.pop();
-                other_p->Apply( state.argstack );
-            }
-            else
-            {
-                other_p.release();
-                break;
-            }
-        }
-
-        state.opstack.push( guard.release() );
-    }
-};
-
-class LParen : public Operator
-{
-    virtual int Precedence() const { return std::numeric_limits<int>::min(); }
-    virtual bool IsLParen() const { return true; }
-    virtual void Process( ParserState& state )
-    {
-        state.opstack.push( this );
-    }
-
-    virtual void Apply( QStack<Value*>& ) { }
-};
-
-class RParen : public Operator
-{
-    virtual int Precedence() const 
-    { 
-        // Should never be on the opstack.
-        assert( false ); 
-    }
-
-    virtual void Process( ParserState& state )
-    {
-        std::auto_ptr<RParen> guard( this );
-        
-        bool saw_lparen = false;
-        while ( !saw_lparen && !state.opstack.isEmpty() )
-        {
-            std::auto_ptr<Operator> op_p( state.opstack.pop() );
-            op_p->Apply( state.argstack );
-
-            saw_lparen = op_p->IsLParen();
-        }
-
-        if ( !saw_lparen )
-        {
-            throw DerivationError( "Unexpected ')'." );
-        }
-    }
-    
-    virtual void Apply( QStack<Value*>& ) { assert( false ); }
-};
-
+//==============================================================================
+/// Represents the multiplication operator.
+/// 
 class Multiplication : public BinaryOperator
 {
 public:
     virtual int Precedence() const { return 1; }
-    virtual void Apply( QStack<Value*>& stack )
+    virtual void Apply( ParserState& state )
     {
-        assert( stack.count() >= 1 );
+        DerivationParserState& derived( 
+            static_cast<DerivationParserState&>( state ) );
 
-        std::auto_ptr<Value> rhs_p( stack.pop() );
+        assert( derived.argstack.count() >= 1 );
 
-        if ( stack.isEmpty() )
+        std::auto_ptr<Value> rhs_p( derived.argstack.pop() );
+
+        if ( derived.argstack.isEmpty() )
         {
-            throw DerivationError( "Missing operand to '*' operator." );
+            throw Error( "Missing operand to '*' operator." );
         }
 
-        std::auto_ptr<Value> lhs_p( stack.pop() );
+        std::auto_ptr<Value> lhs_p( derived.argstack.pop() );
 
         DimensionId lhs = lhs_p->GetId();
         DimensionId rhs = rhs_p->GetId();
@@ -188,81 +116,91 @@ public:
         if ( ( lhs_p->IsInteger() && ( lhs_p->GetScalar() == 0 ) ) ||
             ( rhs_p->IsInteger() && ( rhs_p->GetScalar() == 0 ) ) )
         {
-            stack.push( new Value( 0 ) );
+            derived.argstack.push( new Value( 0 ) );
             return;
         }
 
-        stack.push( new Value( lhs * rhs ) );
+        derived.argstack.push( new Value( lhs * rhs ) );
     }
 };
 
+//==============================================================================
+/// Represents the division operator.
+/// 
 class Division : public BinaryOperator
 {
 public:
     virtual int Precedence() const { return 1; }
-    virtual void Apply( QStack<Value*>& stack )
+    virtual void Apply( ParserState& state )
     {
-        assert( stack.count() >= 1 );
+        DerivationParserState& derived( 
+            static_cast<DerivationParserState&>( state ) );
+        assert( derived.argstack.count() >= 1 );
 
-        std::auto_ptr<Value> rhs_p( stack.pop() );
+        std::auto_ptr<Value> rhs_p( derived.argstack.pop() );
 
-        if ( stack.isEmpty() )
+        if ( derived.argstack.isEmpty() )
         {
-            throw DerivationError( "Missing operand to '/' operator." );
+            throw Error( "Missing operand to '/' operator." );
         }
 
-        std::auto_ptr<Value> lhs_p( stack.pop() );
+        std::auto_ptr<Value> lhs_p( derived.argstack.pop() );
 
         DimensionId lhs = lhs_p->GetId();
         DimensionId rhs = rhs_p->GetId();
 
         if ( lhs_p->IsInteger() && ( lhs_p->GetScalar() == 0 ) )
         {
-            stack.push( new Value( 0 ) );
+            derived.argstack.push( new Value( 0 ) );
             return;
         }
 
         if ( rhs_p->IsInteger() && ( rhs_p->GetScalar() == 0 ) )
         {
-            throw DerivationError( "Division by zero." );
+            throw Error( "Division by zero." );
         }
 
-        stack.push( new Value( lhs / rhs ) );
+        derived.argstack.push( new Value( lhs / rhs ) );
     }
 };
 
+//==============================================================================
+/// Represents the exponentiation operator.
+/// 
 class Exponentiation : public BinaryOperator
 {
 public:
     virtual int Precedence() const { return 2; }
-    virtual void Apply( QStack<Value*>& stack )
+    virtual void Apply( ParserState& state )
     {
-        assert( stack.count() >= 1 );
+        DerivationParserState& derived( 
+            static_cast<DerivationParserState&>( state ) );
+        assert( derived.argstack.count() >= 1 );
 
-        std::auto_ptr<Value> rhs_p( stack.pop() );
+        std::auto_ptr<Value> rhs_p( derived.argstack.pop() );
 
-        if ( stack.isEmpty() )
+        if ( derived.argstack.isEmpty() )
         {
-            throw DerivationError( "Missing operand to '^' operator." );
+            throw Error( "Missing operand to '^' operator." );
         }
 
-        std::auto_ptr<Value> lhs_p( stack.pop() );
+        std::auto_ptr<Value> lhs_p( derived.argstack.pop() );
 
         DimensionId lhs = lhs_p->GetId();
 
         if ( lhs_p->IsInteger() )
         {
-            throw DerivationError(
+            throw Error(
                 "Left-hand side of '^' operator was not a dimension." );
         }
 
         if ( !rhs_p->IsInteger() )
         {
-            throw DerivationError( 
+            throw Error( 
                 "Right-hand side of '^' operator was not an integer." );
         }
 
-        stack.push( new Value( lhs ^ rhs_p->GetScalar() ) );
+        derived.argstack.push( new Value( lhs ^ rhs_p->GetScalar() ) );
     }
 };
 
@@ -342,25 +280,6 @@ QQueue<Token*> ParseTokens( const QString& str )
 } // namespace
 
 //==============================================================================
-/// Constructor.
-/// 
-/// \param [in] description The description of the error.
-/// 
-DerivationError::DerivationError( const QString& description ) : 
-    m_desc( description ) 
-{ }
-
-//==============================================================================
-/// Converts a derivation error into a string.
-/// 
-/// \return The string representation of the error.
-/// 
-DerivationError::operator QString() const
-{
-    return m_desc;
-}
-
-//==============================================================================
 /// Parse a derived dimension derivation string.
 /// 
 /// \param [in] str The derivation.
@@ -369,30 +288,13 @@ DerivationError::operator QString() const
 /// 
 DimensionId ParseDerivation( const QString& str )
 {
-    ParserState state;
+    DerivationParserState state( str );
 
-    state.tokens = ParseTokens( str );
-
-    while ( !state.tokens.isEmpty() )
-    {
-        Token *tok_p( state.tokens.dequeue() );
-        tok_p->Process( state );
-    }
-
-    while ( !state.opstack.isEmpty() )
-    {
-        std::auto_ptr<Operator> op_p( state.opstack.pop() );
-
-        if ( op_p->IsLParen() )
-        {
-            throw DerivationError( "Unmatched '('." );
-        }
-        op_p->Apply( state.argstack );
-    }
+    Util::ParseExpr( state );
 
     if ( state.argstack.count() != 1 )
     {
-        throw DerivationError( "Syntax error (real helpful, huh?)" );
+        throw Error( "Syntax error (real helpful, huh?)" );
     }
 
     return state.argstack.top()->GetId();

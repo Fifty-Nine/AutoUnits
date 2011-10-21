@@ -15,4 +15,5 @@ SOURCES += \
     DerivationParserTests.cpp \
     TestMain.cpp \
 
-QMAKE_POST_LINK = $$DESTDIR/$$TARGET
+QMAKE_POST_LINK = \
+    $$DESTDIR/$$TARGET || echo "One or more tests failed."

@@ -264,6 +264,8 @@ Unit *UnitSystem::GetUnit( const QString& name )
 /// 
 UnitSystem::UnitSystem()
 {
+    Dimension *scalar_dim_p = NewDimension( "Scalar", DimensionId() );
+    NewUnit( "Scalar", scalar_dim_p );
 }
 
 } // namespace AutoUnits

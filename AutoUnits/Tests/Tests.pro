@@ -16,9 +16,11 @@ SOURCES += \
     DerivationParserTests.cpp \
     TestMain.cpp \
 
+run.commands = -$$DESTDIR/$$TARGET
+QMAKE_EXTRA_TARGETS += run
 
-QMAKE_POST_LINK = \
-    $$DESTDIR/$$TARGET || echo "One or more tests failed."
+first.depends = all run
+QMAKE_EXTRA_TARGETS += first
 
 exists( Overrides.pri ) : include( Overrides.pri )
 exists( ../../Overrides.pri ) : include( ../../Overrides.pri )

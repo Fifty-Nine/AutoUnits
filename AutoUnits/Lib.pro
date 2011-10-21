@@ -2,6 +2,8 @@ TEMPLATE = lib
 
 include( ../Common.pri )
 
+TARGET = AutoUnits
+
 HEADERS += \
     DefinitionParser.h \
     DerivationParser.h \

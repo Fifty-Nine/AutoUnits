@@ -2,6 +2,7 @@
 #define AUTO_UNITS_TEST_H
 
 #include <QtTest/QtTest>
+#include <memory>
 
 template<class T> 
 class Test
@@ -9,9 +10,9 @@ class Test
 public:
     Test() 
     {
-        T * test_p = new T;
+        std::auto_ptr<T> test_p( new T );
 
-        QTest::qExec( test_p, QStringList() );
+        QTest::qExec( test_p.get(), QStringList() );
     }
 };
 

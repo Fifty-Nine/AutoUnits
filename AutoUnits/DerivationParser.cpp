@@ -80,44 +80,43 @@ public:
     //
     /// param [in] ids The values.
     virtual void Apply( QStack<Value*>& ids ) = 0;
+    /// Get the precedence of the operator.
+    /// \return The precedence.
+    virtual int Precedence() const = 0;
     virtual bool IsLParen() const { return false; }
 };
 
 class BinaryOperator : public Operator
 {
 public:
-    /// Get the precedence of the operator.
-    /// \return The precedence.
-    virtual int Precedence() const = 0;
-
     /// Process the operator.
     /// \param [in] state The current parser state.
     virtual void Process( ParserState& state )
     {
+        std::auto_ptr<BinaryOperator> guard( this );
         while ( !state.opstack.isEmpty() )
         {
-            BinaryOperator *other_p = 
-                static_cast<BinaryOperator*>( state.opstack.top() );
+            std::auto_ptr<Operator> other_p( state.opstack.top() );
             if ( Precedence() <= other_p->Precedence() )
             {
                 state.opstack.pop();
                 other_p->Apply( state.argstack );
-                delete other_p;
             }
             else
             {
+                other_p.release();
                 break;
             }
         }
 
-        state.opstack.push( this );
+        state.opstack.push( guard.release() );
     }
 };
 
 class LParen : public Operator
 {
-    virtual bool IsLParen() const { return true; }
     virtual int Precedence() const { return std::numeric_limits<int>::min(); }
+    virtual bool IsLParen() const { return true; }
     virtual void Process( ParserState& state )
     {
         state.opstack.push( this );
@@ -128,8 +127,16 @@ class LParen : public Operator
 
 class RParen : public Operator
 {
+    virtual int Precedence() const 
+    { 
+        // Should never be on the opstack.
+        assert( false ); 
+    }
+
     virtual void Process( ParserState& state )
     {
+        std::auto_ptr<RParen> guard( this );
+        
         bool saw_lparen = false;
         while ( !saw_lparen && !state.opstack.isEmpty() )
         {
@@ -358,9 +365,8 @@ DimensionId ParseDerivation( const QString& str )
 
     while ( !state.tokens.isEmpty() )
     {
-        std::auto_ptr<Token> tok_p( state.tokens.dequeue() );
+        Token *tok_p( state.tokens.dequeue() );
         tok_p->Process( state );
-        tok_p.release();
     }
 
     while ( !state.opstack.isEmpty() )

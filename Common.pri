@@ -1,0 +1,4 @@
+DESTDIR = Build/
+OBJECTS_DIR = $$DESTDIR/Objs/
+MOC_DIR = $$DESTDIR/Mocs/
+UI_DIR = $$DESTDIR/Uics/

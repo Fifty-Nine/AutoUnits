@@ -1,5 +1,7 @@
 TEMPLATE = lib
 
+include( ../Common.pri )
+
 HEADERS += \
     DefinitionParser.h \
     DerivationParser.h \
@@ -17,11 +19,6 @@ SOURCES += \
 include( Types/Types.pri )
 
 LIBS += -lyaml-cpp
-
-DESTDIR = Build/
-OBJECTS_DIR = $$DESTDIR/Objs/
-MOC_DIR = $$DESTDIR/Mocs/
-UI_DIR = $$DESTDIR/Uics/
 
 exists( Overrides.pri ) { include( Overrides.pri ) }
 exists( ../Overrides.pri ) { include( ../Overrides.pri ) }

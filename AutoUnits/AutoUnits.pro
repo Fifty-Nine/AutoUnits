@@ -1,26 +1,11 @@
-TEMPLATE = lib
+TEMPLATE = subdirs
 
-include( ../Common.pri )
+CONFIG += ordered
 
-HEADERS += \
-    DefinitionParser.h \
-    DerivationParser.h \
-    Dimension.h \
-    Unit.h \
-    UnitSystem.h \
+SUBDIRS = \
+    Lib.pro \
+    Tests/ \
 
-SOURCES += \
-    DefinitionParser.cpp \
-    DerivationParser.cpp \
-    Dimension.cpp \
-    Unit.cpp \
-    UnitSystem.cpp \
+exists( Overrides.pri ) : include( Overrides.pri )
+exists( ../Overrides.pri ) : include( ../Overrides.pri )
 
-include( Types/Types.pri )
-
-LIBS += -lyaml-cpp
-
-QMAKE_POST_LINK = $(MAKE) -C Tests
-
-exists( Overrides.pri ) { include( Overrides.pri ) }
-exists( ../Overrides.pri ) { include( ../Overrides.pri ) }

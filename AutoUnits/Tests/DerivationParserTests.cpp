@@ -91,6 +91,15 @@ private slots:
         QVERIFY( id0 == id1 );
     }
 
+    void DivisionInverse()
+    {
+        DimensionId id0 = ParseDerivation( "1 / M" );
+        DimensionId id1;
+        id1["M"] = -1;
+
+        QVERIFY( id0 == id1 );
+    }
+
     void DivisionCommutativity()
     {
         DimensionId id0 = ParseDerivation( "A / B" );
@@ -158,22 +167,30 @@ private slots:
         QVERIFY( id0 == id1 );
     }
 
-    void ExponentiationAssociativity()
-    {
-        DimensionId id0 = ParseDerivation( "A ^ 2 ^ 3" );
-        DimensionId id1 = ParseDerivation( "A ^ (2 ^ 3)" );
-        DimensionId id2 = ParseDerivation( "(A ^ 2) ^ 3" );
-
-        QVERIFY( id0 == id1 );
-        QVERIFY( id0 != id2 );
-    }
-
     void ExponentiationZero()
     {
         DimensionId id0 = ParseDerivation( "A ^ 0" );
         DimensionId id1 = ParseDerivation( "1" );
 
         QVERIFY( id0 == id1 );
+    }
+
+    void ExponentiationIntLhs()
+    {
+        try
+        {
+            ParseDerivation( "1 ^ 1" );
+            QFAIL( "Exception not thrown." );
+        } catch (...) { }
+    }
+
+    void ExponentiationDimensionRhs()
+    {
+        try
+        {
+            ParseDerivation( "A ^ B" );
+            QFAIL( "Exception not thrown." );
+        } catch (...) { }
     }
 
     void OperatorPrecedence()

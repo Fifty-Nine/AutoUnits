@@ -15,7 +15,14 @@ namespace AutoUnits
 
 /// Uniquely identifies a dimension as a list of (Base unit, power) pairs.
 /// For instance, acceleration would be [(Meter,1), (Second,-2)]
-typedef QHash<QString,int> DimensionId;
+class DimensionId : public QHash<QString,int>
+{
+public:
+    DimensionId() { }
+    DimensionId( const QString& unit );
+
+    bool operator==( const DimensionId& id ) const;
+};
 
 } // namespace AutoUnits
 

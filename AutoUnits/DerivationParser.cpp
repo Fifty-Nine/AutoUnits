@@ -117,7 +117,7 @@ public:
 class LParen : public Operator
 {
     virtual bool IsLParen() const { return true; }
-    virtual int Precedence() const { return std::numeric_limits<int>::max(); }
+    virtual int Precedence() const { return std::numeric_limits<int>::min(); }
     virtual void Process( ParserState& state )
     {
         state.opstack.push( this );
@@ -130,19 +130,19 @@ class RParen : public Operator
 {
     virtual void Process( ParserState& state )
     {
-        assert( !state.opstack.isEmpty() );
-        
         bool saw_lparen = false;
         while ( !saw_lparen && !state.opstack.isEmpty() )
         {
-            Operator *op_p = state.opstack.pop();
+            std::auto_ptr<Operator> op_p( state.opstack.pop() );
             op_p->Apply( state.argstack );
 
             saw_lparen = op_p->IsLParen();
-            delete op_p;
         }
 
-        delete this;
+        if ( !saw_lparen )
+        {
+            throw DerivationError( "Unexpected ')'." );
+        }
     }
     
     virtual void Apply( QStack<Value*>& ) { assert( false ); }
@@ -154,14 +154,27 @@ public:
     virtual int Precedence() const { return 1; }
     virtual void Apply( QStack<Value*>& stack )
     {
-        Value *rhs_p = stack.pop();
-        Value *lhs_p = stack.pop();
+        assert( stack.count() >= 1 );
+
+        std::auto_ptr<Value> rhs_p( stack.pop() );
+
+        if ( stack.isEmpty() )
+        {
+            throw DerivationError( "Missing operand to '*' operator." );
+        }
+
+        std::auto_ptr<Value> lhs_p( stack.pop() );
 
         DimensionId lhs = lhs_p->GetId();
         DimensionId rhs = rhs_p->GetId();
 
-        delete lhs_p;
-        delete rhs_p;
+        if ( ( lhs_p->IsInteger() && ( lhs_p->GetScalar() == 0 ) ) ||
+            ( rhs_p->IsInteger() && ( rhs_p->GetScalar() == 0 ) ) )
+        {
+            stack.push( new Value( 0 ) );
+            return;
+        }
+
 
         DimensionId result;
 
@@ -184,14 +197,30 @@ public:
     virtual int Precedence() const { return 1; }
     virtual void Apply( QStack<Value*>& stack )
     {
-        Value *rhs_p = stack.pop();
-        Value *lhs_p = stack.pop();
+        assert( stack.count() >= 1 );
+
+        std::auto_ptr<Value> rhs_p( stack.pop() );
+
+        if ( stack.isEmpty() )
+        {
+            throw DerivationError( "Missing operand to '/' operator." );
+        }
+
+        std::auto_ptr<Value> lhs_p( stack.pop() );
 
         DimensionId lhs = lhs_p->GetId();
         DimensionId rhs = rhs_p->GetId();
 
-        delete lhs_p;
-        delete rhs_p;
+        if ( lhs_p->IsInteger() && ( lhs_p->GetScalar() == 0 ) )
+        {
+            stack.push( new Value( 0 ) );
+            return;
+        }
+
+        if ( rhs_p->IsInteger() && ( rhs_p->GetScalar() == 0 ) )
+        {
+            throw DerivationError( "Division by zero." );
+        }
 
         DimensionId result;
         QSet<QString> keys( lhs.keys().toSet() );
@@ -213,18 +242,41 @@ public:
     virtual int Precedence() const { return 2; }
     virtual void Apply( QStack<Value*>& stack )
     {
-        Value *rhs_p = stack.pop();
-        Value *lhs_p = stack.pop();
+        assert( stack.count() >= 1 );
+
+        std::auto_ptr<Value> rhs_p( stack.pop() );
+
+        if ( stack.isEmpty() )
+        {
+            throw DerivationError( "Missing operand to '^' operator." );
+        }
+
+        std::auto_ptr<Value> lhs_p( stack.pop() );
 
         DimensionId lhs = lhs_p->GetId();
 
-        assert( rhs_p->IsInteger() );
+        if ( lhs_p->IsInteger() )
+        {
+            throw DerivationError(
+                "Left-hand side of '^' operator was not a dimension." );
+        }
+
+        if ( !rhs_p->IsInteger() )
+        {
+            throw DerivationError( 
+                "Right-hand side of '^' operator was not an integer." );
+        }
+
         int rhs = rhs_p->GetScalar();
 
-        delete lhs_p;
-        delete rhs_p;
 
         DimensionId result;
+
+        if ( rhs == 0 )
+        {
+            stack.push( new Value( 1 ) );
+            return;
+        }
 
         QSet<QString> keys = lhs.keys().toSet();
         for ( DimensionId::const_iterator it = lhs.begin(); 
@@ -313,6 +365,25 @@ QQueue<Token*> ParseTokens( const QString& str )
 } // namespace
 
 //==============================================================================
+/// Constructor.
+/// 
+/// \param [in] description The description of the error.
+/// 
+DerivationError::DerivationError( const QString& description ) : 
+    m_desc( description ) 
+{ }
+
+//==============================================================================
+/// Converts a derivation error into a string.
+/// 
+/// \return The string representation of the error.
+/// 
+DerivationError::operator QString() const
+{
+    return m_desc;
+}
+
+//==============================================================================
 /// Parse a derived dimension derivation string.
 /// 
 /// \param [in] str The derivation.
@@ -335,10 +406,18 @@ DimensionId ParseDerivation( const QString& str )
     while ( !state.opstack.isEmpty() )
     {
         std::auto_ptr<Operator> op_p( state.opstack.pop() );
+
+        if ( op_p->IsLParen() )
+        {
+            throw DerivationError( "Unmatched '('." );
+        }
         op_p->Apply( state.argstack );
     }
 
-    assert( state.argstack.count() == 1 );
+    if ( state.argstack.count() != 1 )
+    {
+        throw DerivationError( "Syntax error (real helpful, huh?)" );
+    }
 
     return state.argstack.top()->GetId();
 }

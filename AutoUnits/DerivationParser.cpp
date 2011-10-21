@@ -44,6 +44,16 @@ class Token
 {
 public:
     virtual ~Token() { }
+
+    /// Do whatever needs to be done to process the token with the given parser
+    /// state. 
+    /// 
+    /// \param [in] state The parser state.
+    /// 
+    /// \note The token takes ownership of itself for the lifetime of this
+    /// function. In other words, the token either needs to be deleted or
+    /// pushed onto one of the stacks before the function exits. 
+    /// 
     virtual void Process( ParserState& state ) = 0;
 };
 

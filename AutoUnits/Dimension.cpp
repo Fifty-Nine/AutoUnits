@@ -34,6 +34,17 @@ DimensionId Dimension::Id() const
 }
 
 //==============================================================================
+/// Determine whether the dimension is a derived dimension.
+/// 
+/// \return True if the dimension is derived from other dimensions.
+///
+bool Dimension::IsDerived() const
+{
+    return m_id.count() > 1;
+}
+
+
+//==============================================================================
 /// Get the base unit for the dimension.
 /// 
 /// \return The base unit.

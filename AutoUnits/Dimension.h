@@ -31,6 +31,7 @@ public:
     //==========================================================================
     QString Name() const;
     DimensionId Id() const;
+    bool IsDerived() const;
 
     const Unit *GetBaseUnit() const;
     QList<const Unit*> Units() const;

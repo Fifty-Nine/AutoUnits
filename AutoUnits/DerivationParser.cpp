@@ -62,27 +62,63 @@ public:
 class Value : public Token<DState>
 {
 public:
+    //==========================================================================
+    /// Constructor.
+    ///
+    /// \param [in] id The dimension id for the token.
+    ///
     Value( const DimensionId& id ) : m_id( id ), m_scalar( -1 ) { }
+
+    //==========================================================================
+    /// Constructor.
+    ///
+    /// \param [in] scalar The scalar value for the token.
+    ///
     Value( int scalar ) : m_id( DimensionId() ), m_scalar( scalar ) { }
 
+    //==========================================================================
+    /// Test whether the value is a scalar.
+    /// 
+    /// \return True if the value is a scalar.
+    /// 
     virtual bool IsInteger() const { return m_scalar >= 0; }
+    
+    //==========================================================================
+    /// Get the dimension ID of the token.
+    /// 
+    /// \return The dimension id.
+    /// 
     DimensionId GetId() const
     {
         return m_id;
     }
-
+    
+    //==========================================================================
+    /// Get the integral value of the (scalar) token.
+    /// 
+    /// \return The value.
+    /// 
     int GetScalar() const
     {
         assert( IsInteger() );
         return m_scalar;
     }
 
+    //==========================================================================
+    /// Process the token.
+    /// 
+    /// \param [in] state The parser state.
+    /// 
     virtual void Process( DState& state )
     {
         state.argstack.push( this );
     }
 
+private:
+    /// The token's dimension id.
     DimensionId m_id;
+
+    /// The token's scalar value.
     int m_scalar;
 };
 
@@ -92,7 +128,18 @@ public:
 class Multiplication : public BinaryOperator<DState>
 {
 public:
+    //==========================================================================
+    /// Get the precedence of the operation.
+    /// 
+    /// \return The precedence value.
+    /// 
     virtual int Precedence() const { return 1; }
+
+    //==========================================================================
+    /// Apply the operator.
+    /// 
+    /// \param [in] state The current parser state.
+    /// 
     virtual void Apply( DState& state )
     {
         assert( state.argstack.count() >= 1 );
@@ -126,7 +173,18 @@ public:
 class Division : public BinaryOperator<DState>
 {
 public:
+    //==========================================================================
+    /// Get the precedence of the operator.
+    /// 
+    /// \return The precedence.
+    ///
     virtual int Precedence() const { return 1; }
+
+    //==========================================================================
+    /// Apply the operator.
+    /// 
+    /// \param [in] state The parser state.
+    /// 
     virtual void Apply( DState& state )
     {
         assert( state.argstack.count() >= 1 );
@@ -164,7 +222,18 @@ public:
 class Exponentiation : public BinaryOperator<DState>
 {
 public:
+    //==========================================================================
+    /// Get the precedence of the operator.
+    /// 
+    /// \return The precedence.
+    /// 
     virtual int Precedence() const { return 2; }
+
+    //==========================================================================
+    /// Apply the operator.
+    /// 
+    /// \param [in] state The parser state.
+    /// 
     virtual void Apply( DState& state )
     {
         assert( state.argstack.count() >= 1 );

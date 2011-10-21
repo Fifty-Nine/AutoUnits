@@ -37,7 +37,7 @@ public:
 //==============================================================================
 /// A simple concrete implementation of the error interface.
 /// 
-class Error
+class Error : public ErrorInterface
 {
 public:
     Error( const QString& desc );

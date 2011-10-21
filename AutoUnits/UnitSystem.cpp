@@ -1,5 +1,5 @@
 //==============================================================================
-/// \file Math/Units/AutoUnits/UnitSystem.cpp
+/// \file AutoUnits/UnitSystem.cpp
 /// 
 /// Header file for the AutoUnits::UnitSystem class.
 ///
@@ -95,7 +95,7 @@ QList<const Unit*> UnitSystem::Units() const
 //==============================================================================
 /// Get the dimension with the given identifier.
 /// 
-/// \param [in] dimension_id The identifier.
+/// \param [in] id The identifier.
 /// 
 /// \return The dimension, or NULL if not present.
 ///

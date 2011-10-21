@@ -1,7 +1,7 @@
 #ifndef OBJECT_VIEWER_DB_OBJECT_QT_YAML_H
 #define OBJECT_VIEWER_DB_OBJECT_QT_YAML_H
 //==============================================================================
-/// \file ObjectViewer/Db/Object/QtYaml.h
+/// \file AutoUnits/QtYaml.h
 /// 
 /// Functions to simplify using Yaml-cpp with Qt objects.
 /// 

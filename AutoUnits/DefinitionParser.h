@@ -14,6 +14,7 @@
 #include <QString>
 
 #include "Types/DimensionId.h"
+#include "Util/Error.h"
 
 namespace YAML 
 { 
@@ -79,9 +80,11 @@ private:
 //==============================================================================
 /// A class for reporting parse errors.
 /// 
-class ParseError
+class ParseError : public Util::ErrorInterface
 {
 public:
+    /// The types of errors.
+    /// \todo Replace with separate classes for each type.
     enum ErrorType
     {
         Error,
@@ -91,7 +94,8 @@ public:
     ParseError( const QString& file, int line, const QString& description, 
         ErrorType error_type = Error );
 
-    operator QString() const;
+    virtual operator QString() const;
+    virtual void Throw();
 
     /// The file path.
     QString m_file;

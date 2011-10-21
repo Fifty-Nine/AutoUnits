@@ -1,5 +1,5 @@
 //==============================================================================
-/// \file Math/Units/AutoUnits/Dimension.h
+/// \file AutoUnits/Dimension.h
 /// 
 /// Header file for the AutoUnits::Dimension class.
 ///

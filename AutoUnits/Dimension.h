@@ -1,7 +1,7 @@
-#ifndef MATH_UNITS_AUTO_UNITS_DIMENSION_H
-#define MATH_UNITS_AUTO_UNITS_DIMENSION_H
+#ifndef AUTO_UNITS_DIMENSION_H
+#define AUTO_UNITS_DIMENSION_H
 //==============================================================================
-/// \file Math/Units/AutoUnits/Dimension.h
+/// \file AutoUnits/Dimension.h
 /// 
 /// Header file for the AutoUnits::Dimension class.
 ///

@@ -102,7 +102,7 @@ DimensionId DimensionId::operator/( const DimensionId& rhs ) const
 //==============================================================================
 /// Calculate the resulting dimension of raising a dimension to a power.
 /// 
-/// \param [in] rhs The power.
+/// \param [in] exp The power.
 /// 
 /// \return The resulting dimension.
 /// 

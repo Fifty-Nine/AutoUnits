@@ -1,7 +1,7 @@
-#ifndef MATH_UNITS_AUTO_UNITS_UNIT_SYSTEM_H
-#define MATH_UNITS_AUTO_UNITS_UNIT_SYSTEM_H
+#ifndef AUTO_UNITS_UNIT_SYSTEM_H
+#define AUTO_UNITS_UNIT_SYSTEM_H
 //==============================================================================
-/// \file Math/Units/AutoUnits/UnitSystem.h
+/// \file AutoUnits/UnitSystem.h
 /// 
 /// Header file for the AutoUnits::UnitSystem class.
 ///
@@ -62,4 +62,4 @@ private:
 
 } // namespace AutoUnits
 
-#endif // MATH_UNITS_AUTO_UNITS_UNIT_SYSTEM_H
+#endif // AUTO_UNITS_UNIT_SYSTEM_H

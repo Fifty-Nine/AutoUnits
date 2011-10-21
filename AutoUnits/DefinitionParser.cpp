@@ -94,9 +94,6 @@ QList<ParseError> DefinitionParser::Errors() const
 //==============================================================================
 /// Parse the file with the given path.
 /// 
-/// \param [in] path The path to the file.
-/// 
-/// 
 void DefinitionParser::ParseFile()
 {
     std::ifstream in( qPrintable( m_file ) );
@@ -288,8 +285,10 @@ Unit *DefinitionParser::DefineUnit( const YAML::Mark& mark,
 //==============================================================================
 /// Constructor.
 /// 
+/// \param [in] file The file name.
 /// \param [in] line The line number.
 /// \param [in] description The description of the error.
+/// \param [in] type The error type.
 /// 
 ParseError::ParseError( const QString& file, int line, 
     const QString& description, ErrorType type ) : 
@@ -306,6 +305,14 @@ ParseError::operator QString() const
 {
     QString format = ( m_error_type == Error ) ? ERROR_FORMAT : WARNING_FORMAT;
     return ERROR_FORMAT.arg( m_file ).arg( m_line ).arg( m_desc );
+}
+
+//==============================================================================
+/// [Re]throw the error.
+///
+void ParseError::Throw() 
+{
+    throw *this;
 }
 
 } // namespace AutoUnits

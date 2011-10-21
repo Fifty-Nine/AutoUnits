@@ -10,8 +10,37 @@
 
 #include "Types/DimensionId.h"
 
+
 namespace AutoUnits
 {
+
+namespace
+{
+
+QSet<QString> AllKeys( const DimensionId& lhs, const DimensionId& rhs )
+{
+    return lhs.uniqueKeys().toSet().unite( rhs.uniqueKeys().toSet() );
+}
+
+int add( int a, int b ) { return a + b; }
+int sub( int a, int b ) { return a - b; }
+
+DimensionId ApplyToAll( const DimensionId& lhs, const DimensionId& rhs, 
+    int (*operation)(int,int) )
+{
+    QSet<QString> all_keys = AllKeys( lhs, rhs );
+
+    DimensionId result;
+
+    for ( QSet<QString>::const_iterator it = all_keys.begin(); 
+        it != all_keys.end(); ++it )
+    {
+        result[*it] = operation( lhs[*it], rhs[*it] );
+    }
+    return result;
+}
+
+} // namespace 
 
 //==============================================================================
 /// Construct a fundamental dimension id.
@@ -32,8 +61,7 @@ DimensionId::DimensionId( const QString& dim )
 /// 
 bool DimensionId::operator==( const DimensionId& rhs ) const
 {
-    QSet<QString> all_keys = uniqueKeys().toSet();
-    all_keys.unite( rhs.uniqueKeys().toSet() );
+    QSet<QString> all_keys = AllKeys( *this, rhs );
 
     for ( QSet<QString>::const_iterator it = all_keys.begin(); 
         it != all_keys.end(); ++it )
@@ -45,6 +73,47 @@ bool DimensionId::operator==( const DimensionId& rhs ) const
     }
 
     return true;
+}
+
+//==============================================================================
+/// Calculate the resulting dimension of multiplying two dimensions.
+/// 
+/// \param [in] rhs The right hand side.
+/// 
+/// \return The resulting dimension.
+/// 
+DimensionId DimensionId::operator*( const DimensionId& rhs ) const
+{
+    return ApplyToAll( *this, rhs, &add );
+}
+
+//==============================================================================
+/// Calculate the resulting dimension of dividing two dimensions.
+/// 
+/// \param [in] rhs The right hand side.
+/// 
+/// \return The resulting dimension.
+/// 
+DimensionId DimensionId::operator/( const DimensionId& rhs ) const
+{
+    return ApplyToAll( *this, rhs, &sub );
+}
+
+//==============================================================================
+/// Calculate the resulting dimension of raising a dimension to a power.
+/// 
+/// \param [in] rhs The power.
+/// 
+/// \return The resulting dimension.
+/// 
+DimensionId DimensionId::operator^( int exp ) const
+{
+    DimensionId result = *this;
+    for ( iterator it = result.begin(); it != result.end(); ++it )
+    {
+        *it *= exp;
+    }
+    return result;
 }
 
 } // namespace AutoUnits

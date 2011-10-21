@@ -175,19 +175,7 @@ public:
             return;
         }
 
-
-        DimensionId result;
-
-        QSet<QString> keys( lhs.keys().toSet() );
-        keys.unite( rhs.keys().toSet() );
-
-        for ( QSet<QString>::const_iterator it = keys.begin(); 
-            it != keys.end(); ++it )
-        {
-            result[*it] = ( lhs[*it] + rhs[*it] );
-        }
-
-        stack.push( new Value( result ) );
+        stack.push( new Value( lhs * rhs ) );
     }
 };
 
@@ -222,17 +210,7 @@ public:
             throw DerivationError( "Division by zero." );
         }
 
-        DimensionId result;
-        QSet<QString> keys( lhs.keys().toSet() );
-        keys.unite( rhs.keys().toSet() );
-
-        for ( QSet<QString>::const_iterator it = keys.begin(); 
-            it != keys.end(); ++it )
-        {
-            result[*it] = ( lhs[*it] - rhs[*it] );
-        }
-
-        stack.push( new Value( result ) );
+        stack.push( new Value( lhs / rhs ) );
     }
 };
 
@@ -267,25 +245,7 @@ public:
                 "Right-hand side of '^' operator was not an integer." );
         }
 
-        int rhs = rhs_p->GetScalar();
-
-
-        DimensionId result;
-
-        if ( rhs == 0 )
-        {
-            stack.push( new Value( 1 ) );
-            return;
-        }
-
-        QSet<QString> keys = lhs.keys().toSet();
-        for ( DimensionId::const_iterator it = lhs.begin(); 
-            it != lhs.end(); ++it )
-        {
-            result[it.key()] = ( it.value() * rhs );
-        }
-
-        stack.push( new Value( result ) );
+        stack.push( new Value( lhs ^ rhs_p->GetScalar() ) );
     }
 };
 

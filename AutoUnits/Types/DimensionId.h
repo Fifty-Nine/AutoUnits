@@ -22,6 +22,10 @@ public:
     DimensionId( const QString& unit );
 
     bool operator==( const DimensionId& id ) const;
+
+    DimensionId operator*( const DimensionId& rhs ) const;
+    DimensionId operator/( const DimensionId& rhs ) const;
+    DimensionId operator^( int exp ) const;
 };
 
 } // namespace AutoUnits

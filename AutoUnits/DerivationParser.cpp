@@ -24,13 +24,14 @@ namespace
 
 using namespace Util;
 class Value;
+class DState;
 
-QQueue<Token*> ParseTokens( const QString& str );
+QQueue<Token<DState>*> ParseTokens( const QString& str );
 
 //==============================================================================
 /// The state for the derivation parser.
 ///
-class DerivationParserState : public Util::ParserState
+class DState : public ParserState<DState>
 {
 public:
     //==========================================================================
@@ -38,7 +39,7 @@ public:
     /// 
     /// \param [in] str The string being parsed.
     /// 
-    DerivationParserState( const QString& str ) 
+    DState( const QString& str ) 
     {
         tokens = ParseTokens( str );
     }
@@ -46,7 +47,7 @@ public:
     //==========================================================================
     /// Destructor.
     /// 
-    virtual ~DerivationParserState()
+    virtual ~DState()
     {
         qDeleteAll( argstack );
     }
@@ -58,7 +59,7 @@ public:
 //==============================================================================
 /// Represents a value in the input.
 /// 
-class Value : public Token
+class Value : public Token<DState>
 {
 public:
     Value( const DimensionId& id ) : m_id( id ), m_scalar( -1 ) { }
@@ -76,11 +77,9 @@ public:
         return m_scalar;
     }
 
-    virtual void Process( ParserState& state )
+    virtual void Process( DState& state )
     {
-        DerivationParserState& derived( 
-            static_cast<DerivationParserState&>( state ) );
-        derived.argstack.push( this );
+        state.argstack.push( this );
     }
 
     DimensionId m_id;
@@ -90,25 +89,22 @@ public:
 //==============================================================================
 /// Represents the multiplication operator.
 /// 
-class Multiplication : public BinaryOperator
+class Multiplication : public BinaryOperator<DState>
 {
 public:
     virtual int Precedence() const { return 1; }
-    virtual void Apply( ParserState& state )
+    virtual void Apply( DState& state )
     {
-        DerivationParserState& derived( 
-            static_cast<DerivationParserState&>( state ) );
+        assert( state.argstack.count() >= 1 );
 
-        assert( derived.argstack.count() >= 1 );
+        std::auto_ptr<Value> rhs_p( state.argstack.pop() );
 
-        std::auto_ptr<Value> rhs_p( derived.argstack.pop() );
-
-        if ( derived.argstack.isEmpty() )
+        if ( state.argstack.isEmpty() )
         {
             throw Error( "Missing operand to '*' operator." );
         }
 
-        std::auto_ptr<Value> lhs_p( derived.argstack.pop() );
+        std::auto_ptr<Value> lhs_p( state.argstack.pop() );
 
         DimensionId lhs = lhs_p->GetId();
         DimensionId rhs = rhs_p->GetId();
@@ -116,42 +112,40 @@ public:
         if ( ( lhs_p->IsInteger() && ( lhs_p->GetScalar() == 0 ) ) ||
             ( rhs_p->IsInteger() && ( rhs_p->GetScalar() == 0 ) ) )
         {
-            derived.argstack.push( new Value( 0 ) );
+            state.argstack.push( new Value( 0 ) );
             return;
         }
 
-        derived.argstack.push( new Value( lhs * rhs ) );
+        state.argstack.push( new Value( lhs * rhs ) );
     }
 };
 
 //==============================================================================
 /// Represents the division operator.
 /// 
-class Division : public BinaryOperator
+class Division : public BinaryOperator<DState>
 {
 public:
     virtual int Precedence() const { return 1; }
-    virtual void Apply( ParserState& state )
+    virtual void Apply( DState& state )
     {
-        DerivationParserState& derived( 
-            static_cast<DerivationParserState&>( state ) );
-        assert( derived.argstack.count() >= 1 );
+        assert( state.argstack.count() >= 1 );
 
-        std::auto_ptr<Value> rhs_p( derived.argstack.pop() );
+        std::auto_ptr<Value> rhs_p( state.argstack.pop() );
 
-        if ( derived.argstack.isEmpty() )
+        if ( state.argstack.isEmpty() )
         {
             throw Error( "Missing operand to '/' operator." );
         }
 
-        std::auto_ptr<Value> lhs_p( derived.argstack.pop() );
+        std::auto_ptr<Value> lhs_p( state.argstack.pop() );
 
         DimensionId lhs = lhs_p->GetId();
         DimensionId rhs = rhs_p->GetId();
 
         if ( lhs_p->IsInteger() && ( lhs_p->GetScalar() == 0 ) )
         {
-            derived.argstack.push( new Value( 0 ) );
+            state.argstack.push( new Value( 0 ) );
             return;
         }
 
@@ -160,31 +154,29 @@ public:
             throw Error( "Division by zero." );
         }
 
-        derived.argstack.push( new Value( lhs / rhs ) );
+        state.argstack.push( new Value( lhs / rhs ) );
     }
 };
 
 //==============================================================================
 /// Represents the exponentiation operator.
 /// 
-class Exponentiation : public BinaryOperator
+class Exponentiation : public BinaryOperator<DState>
 {
 public:
     virtual int Precedence() const { return 2; }
-    virtual void Apply( ParserState& state )
+    virtual void Apply( DState& state )
     {
-        DerivationParserState& derived( 
-            static_cast<DerivationParserState&>( state ) );
-        assert( derived.argstack.count() >= 1 );
+        assert( state.argstack.count() >= 1 );
 
-        std::auto_ptr<Value> rhs_p( derived.argstack.pop() );
+        std::auto_ptr<Value> rhs_p( state.argstack.pop() );
 
-        if ( derived.argstack.isEmpty() )
+        if ( state.argstack.isEmpty() )
         {
             throw Error( "Missing operand to '^' operator." );
         }
 
-        std::auto_ptr<Value> lhs_p( derived.argstack.pop() );
+        std::auto_ptr<Value> lhs_p( state.argstack.pop() );
 
         DimensionId lhs = lhs_p->GetId();
 
@@ -200,7 +192,7 @@ public:
                 "Right-hand side of '^' operator was not an integer." );
         }
 
-        derived.argstack.push( new Value( lhs ^ rhs_p->GetScalar() ) );
+        state.argstack.push( new Value( lhs ^ rhs_p->GetScalar() ) );
     }
 };
 
@@ -211,9 +203,9 @@ public:
 /// 
 /// \return The tokens.
 /// 
-QQueue<Token*> ParseTokens( const QString& str )
+QQueue<Token<DState>*> ParseTokens( const QString& str )
 {
-    QQueue<Token*> result;
+    QQueue<Token<DState>*> result;
     int i = 0;
     while ( i < str.count() )
     {
@@ -234,12 +226,12 @@ QQueue<Token*> ParseTokens( const QString& str )
         }
         else if ( str[i] == '(' )
         {
-            result.enqueue( new LParen );
+            result.enqueue( new LParen<DState> );
             i++;
         }
         else if ( str[i] == ')' )
         {
-            result.enqueue( new RParen );
+            result.enqueue( new RParen<DState> );
             i++;
         }
         else if ( str[i].isDigit() )
@@ -270,7 +262,7 @@ QQueue<Token*> ParseTokens( const QString& str )
         }
         else
         {
-            return QQueue<Token*>();
+            return QQueue<Token<DState>*>();
         }
     }
 
@@ -288,9 +280,8 @@ QQueue<Token*> ParseTokens( const QString& str )
 /// 
 DimensionId ParseDerivation( const QString& str )
 {
-    DerivationParserState state( str );
-
-    Util::ParseExpr( state );
+    DState state( str );
+    ParseExpr( state );
 
     if ( state.argstack.count() != 1 )
     {

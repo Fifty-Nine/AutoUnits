@@ -4,5 +4,4 @@ HEADERS += \
 
 SOURCES += \
     Util/Error.cpp \
-    Util/ExprParser.cpp \
 

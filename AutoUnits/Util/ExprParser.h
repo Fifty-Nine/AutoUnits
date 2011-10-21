@@ -22,12 +22,15 @@ namespace AutoUnits
 namespace Util
 {
 
+template<class ST>
 class Token;
+template<class ST>
 class Operator;
 
 //==============================================================================
 /// The base class for the state used by the parser.
-/// 
+///
+template<class STATE> 
 class ParserState
 {
 public:
@@ -37,13 +40,16 @@ public:
         qDeleteAll( opstack );
     }
 
-    QQueue<Token*> tokens;
-    QStack<Operator*> opstack;
+    QQueue<Token<STATE>*> tokens;
+    QStack<Operator<STATE>*> opstack;
 };
 
 //==============================================================================
 /// The base class for all tokens consumed by the parser.
 /// 
+/// \tparam STATE The parser state type.
+/// 
+template<class STATE> 
 class Token
 {
 public:
@@ -59,19 +65,20 @@ public:
     /// function. In other words, the token either needs to be deleted or
     /// pushed onto one of the stacks before the function exits. 
     /// 
-    virtual void Process( ParserState& state ) = 0;
+    virtual void Process( STATE& state ) = 0;
 };
 
 //==============================================================================
 /// The base class for all operators consumed by the parser.
 /// 
-class Operator : public Token
+template<class STATE>
+class Operator : public Token<STATE>
 {
 public:
     /// Apply the operator to the values on the stack.
     //
     /// param [in] ids The values.
-    virtual void Apply( ParserState& ids ) = 0;
+    virtual void Apply( STATE& ids ) = 0;
     /// Get the precedence of the operator.
     /// \return The precedence.
     virtual int Precedence() const = 0;
@@ -80,19 +87,21 @@ public:
 
 //==============================================================================
 /// The base class for all binary operations consumed by the parser.
-/// 
-class BinaryOperator : public Operator
+///
+template<class STATE> 
+class BinaryOperator : public Operator<STATE>
 {
 public:
     /// Process the operator.
     /// \param [in] state The current parser state.
-    virtual void Process( ParserState& state )
+    virtual void Process( STATE& state )
     {
         std::auto_ptr<BinaryOperator> guard( this );
         while ( !state.opstack.isEmpty() )
         {
-            std::auto_ptr<Operator> other_p( state.opstack.top() );
-            if ( Precedence() <= other_p->Precedence() )
+            std::auto_ptr<Operator<STATE> > other_p( 
+                state.opstack.top() );
+            if ( this->Precedence() <= other_p->Precedence() )
             {
                 state.opstack.pop();
                 other_p->Apply( state );
@@ -111,22 +120,24 @@ public:
 //==============================================================================
 /// A token instantiated for a left parenthesis.
 /// 
-class LParen : public Operator
+template<class STATE>
+class LParen : public Operator<STATE>
 {
     virtual int Precedence() const { return std::numeric_limits<int>::min(); }
     virtual bool IsLParen() const { return true; }
-    virtual void Process( ParserState& state )
+    virtual void Process( STATE& state )
     {
         state.opstack.push( this );
     }
 
-    virtual void Apply( ParserState& ) { }
+    virtual void Apply( STATE& ) { }
 };
 
 //==============================================================================
 /// A token instantiated for a right parenthesis.
 /// 
-class RParen : public Operator
+template<class STATE>
+class RParen : public Operator<STATE>
 {
     virtual int Precedence() const 
     { 
@@ -134,14 +145,14 @@ class RParen : public Operator
         assert( false ); 
     }
 
-    virtual void Process( ParserState& state )
+    virtual void Process( STATE& state )
     {
         std::auto_ptr<RParen> guard( this );
         
         bool saw_lparen = false;
         while ( !saw_lparen && !state.opstack.isEmpty() )
         {
-            std::auto_ptr<Operator> op_p( state.opstack.pop() );
+            std::auto_ptr<Operator<STATE> > op_p( state.opstack.pop() );
             op_p->Apply( state );
 
             saw_lparen = op_p->IsLParen();
@@ -153,10 +164,32 @@ class RParen : public Operator
         }
     }
     
-    virtual void Apply( ParserState& ) { assert( false ); }
+    virtual void Apply( STATE& ) { assert( false ); }
 };
 
-void ParseExpr( ParserState& state );
+//==============================================================================
+/// Parse an expression in the given string.
+/// 
+template<class STATE>
+void ParseExpr( STATE& state )
+{
+    while ( !state.tokens.isEmpty() )
+    {
+        Token<STATE> *tok_p( state.tokens.dequeue() );
+        tok_p->Process( state );
+    }
+
+    while ( !state.opstack.isEmpty() )
+    {
+        std::auto_ptr<Operator<STATE> > op_p( state.opstack.pop() );
+
+        if ( op_p->IsLParen() )
+        {
+            throw Error( "Unmatched '('." );
+        }
+        op_p->Apply( state );
+    }
+}
 
 } // namespace Util
 } // namespace AutoUnits

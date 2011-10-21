@@ -34,13 +34,19 @@ template<class STATE>
 class ParserState
 {
 public:
+    //==========================================================================
+    /// Destructor.
+    /// 
     virtual ~ParserState()
     {
         qDeleteAll( tokens );
         qDeleteAll( opstack );
     }
 
+    /// The token input queue.
     QQueue<Token<STATE>*> tokens;
+
+    /// The operator stack.
     QStack<Operator<STATE>*> opstack;
 };
 
@@ -56,6 +62,7 @@ public:
     /// Destructor.
     virtual ~Token() { }
 
+    //==========================================================================
     /// Do whatever needs to be done to process the token with the given parser
     /// state. 
     /// 
@@ -75,13 +82,25 @@ template<class STATE>
 class Operator : public Token<STATE>
 {
 public:
-    /// Apply the operator to the values on the stack.
-    //
-    /// param [in] ids The values.
-    virtual void Apply( STATE& ids ) = 0;
+    //==========================================================================
+    /// Apply the operator.
+    ///
+    /// param [in] state The parser state.
+    /// 
+    virtual void Apply( STATE& state ) = 0;
+
+    //==========================================================================
     /// Get the precedence of the operator.
+    /// 
     /// \return The precedence.
+    /// 
     virtual int Precedence() const = 0;
+
+    //==========================================================================
+    /// Test whether the operator is a left parenthesis.
+    /// 
+    /// \return True if the operator is an lparen.
+    /// 
     virtual bool IsLParen() const { return false; }
 };
 
@@ -92,8 +111,11 @@ template<class STATE>
 class BinaryOperator : public Operator<STATE>
 {
 public:
+    //==========================================================================
     /// Process the operator.
+    /// 
     /// \param [in] state The current parser state.
+    /// 
     virtual void Process( STATE& state )
     {
         std::auto_ptr<BinaryOperator> guard( this );
@@ -123,13 +145,33 @@ public:
 template<class STATE>
 class LParen : public Operator<STATE>
 {
+    //==========================================================================
+    /// Get the precedence of the operator.
+    /// 
+    /// \return The precedence.
+    /// 
     virtual int Precedence() const { return std::numeric_limits<int>::min(); }
+
+    //==========================================================================
+    /// Test whether the operator is a left parenthesis.
+    /// 
+    /// \return True.
+    /// 
     virtual bool IsLParen() const { return true; }
+
+    //==========================================================================
+    /// Process the operator.
+    /// 
+    /// \param [in] state The parser state.
+    /// 
     virtual void Process( STATE& state )
     {
         state.opstack.push( this );
     }
 
+    //==========================================================================
+    /// Apply the operator.
+    ///
     virtual void Apply( STATE& ) { }
 };
 
@@ -137,14 +179,13 @@ class LParen : public Operator<STATE>
 /// A token instantiated for a right parenthesis.
 /// 
 template<class STATE>
-class RParen : public Operator<STATE>
+class RParen : public Token<STATE>
 {
-    virtual int Precedence() const 
-    { 
-        // Should never be on the opstack.
-        assert( false ); 
-    }
-
+    //==========================================================================
+    /// Process the token.
+    /// 
+    /// \param [in] state The state.
+    /// 
     virtual void Process( STATE& state )
     {
         std::auto_ptr<RParen> guard( this );
@@ -163,8 +204,6 @@ class RParen : public Operator<STATE>
             throw Error( "Unexpected ')'." );
         }
     }
-    
-    virtual void Apply( STATE& ) { assert( false ); }
 };
 
 //==============================================================================

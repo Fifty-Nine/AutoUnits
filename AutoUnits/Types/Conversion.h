@@ -55,6 +55,8 @@ public:
     /// 
     virtual bool IsConstant() const { return false; }
 
+    static std::auto_ptr<Conversion> ScaleFactor( double factor );
+
 private:
     /// Not implemented.
     Conversion( const Conversion& );

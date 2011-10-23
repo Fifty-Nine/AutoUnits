@@ -29,6 +29,18 @@ Conversion::~Conversion()
 }
 
 //==============================================================================
+/// Construct a simple scaling factor conversion.
+/// 
+/// \param [in] factor The scaling factor.
+/// 
+std::auto_ptr<Conversion> Conversion::ScaleFactor( double factor )
+{
+    std::auto_ptr<Conversion> lhs_p( new Constant( factor ) );
+    std::auto_ptr<Conversion> rhs_p( new Value );
+    return std::auto_ptr<Conversion>( new MultOp( lhs_p, rhs_p ) );
+}
+
+//==============================================================================
 /// Constructor.
 /// 
 /// \param [in] value The constant's value.
@@ -72,6 +84,14 @@ double Constant::Eval( double ) const
 bool Constant::IsConstant() const 
 {
     return true;
+}
+
+//==============================================================================
+/// Evaluate the value.
+/// 
+double Value::Eval( double value ) const
+{
+    return value;
 }
 
 //==============================================================================

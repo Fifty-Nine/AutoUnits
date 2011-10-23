@@ -8,18 +8,21 @@
 //  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
 
-namespace YAML { class Node; }
+#include <memory>
+
+#include <QString>
 
 namespace AutoUnits
 {
 
-class Unit;
+namespace Conversions { class Conversion; }
 
 //==============================================================================
-/// Parse the unit conversion specification in the given YAML node and store it
-/// in the given unit. 
+/// Parse the conversion string.
 /// 
-void ParseConversion( YAML::Node& node, Unit *unit_p );
+/// \return The parsed conversion.
+/// 
+std::auto_ptr<Conversions::Conversion> ParseConversion( const QString& str );
 
 } // namespace AutoUnits
 

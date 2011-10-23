@@ -331,7 +331,7 @@ QQueue<Token<DState>*> ParseTokens( const QString& str )
         }
         else
         {
-            return QQueue<Token<DState>*>();
+            throw Error( "Unmatched input: " + str.mid( i ) );
         }
     }
 

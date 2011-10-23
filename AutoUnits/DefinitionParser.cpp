@@ -15,10 +15,12 @@
 #include <QStack>
 #include <QStringList>
 
+#include "ConversionParser.h"
 #include "DefinitionParser.h"
 #include "DerivationParser.h"
 #include "Dimension.h"
 #include "QtYaml.h"
+#include "Unit.h"
 #include "UnitSystem.h"
 
 namespace
@@ -215,8 +217,6 @@ void DefinitionParser::ParseConvertedUnit( const YAML::Node& unit )
     QString dim_name;
     dim_node >> dim_name;
 
-    QString conversion;
-    unit["conversion"] >> conversion;
 
     Dimension *dim_p = m_result->GetDimension( dim_name );
 
@@ -227,7 +227,36 @@ void DefinitionParser::ParseConvertedUnit( const YAML::Node& unit )
             UNDEFINED_DIM_NAME.arg( dim_name ).arg( mark.line ) );
     }
 
-    (void)DefineUnit( unit.GetMark(), name, dim_p );
+    Unit *unit_p = DefineUnit( unit.GetMark(), name, dim_p );
+    ParseConversions( unit["conversion"], unit_p );
+}
+
+//==============================================================================
+/// Parse the conversion expression and store it in the unit.
+/// 
+/// \param [in] node The node with the expression.
+/// \param [in] unit_p The unit to set up/
+/// 
+void DefinitionParser::ParseConversions( const YAML::Node& node, Unit *unit_p )
+{
+    if ( node.Type() == YAML::NodeType::Scalar )
+    {
+        double value;
+        node >> value;
+
+        unit_p->SetToBase( Conversion::ScaleFactor( value ) );
+        unit_p->SetFromBase( Conversion::ScaleFactor( 1.0 / value ) );
+    }
+    else
+    {
+        QString to_base;
+        QString from_base;
+        node[0] >> to_base;
+        node[1] >> from_base;
+
+        unit_p->SetToBase( ParseConversion( to_base ) );
+        unit_p->SetFromBase( ParseConversion( from_base ) );
+    }
 }
 
 //==============================================================================

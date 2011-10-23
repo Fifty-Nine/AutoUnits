@@ -40,6 +40,9 @@ public:
 
 private:
     Unit( const QString& name, Dimension *dimension_p );
+    Unit( const QString& name, Dimension *dimension_p, 
+        std::auto_ptr<Conversion> to_base, 
+        std::auto_ptr<Conversion> from_base );
 
     friend class UnitSystem;
 
@@ -48,9 +51,9 @@ private:
     /// The unit's dimension.
     Dimension *m_dim_p;
     /// The to-base conversion.
-    std::auto_ptr<Conversion> m_to_base;
+    std::auto_ptr<Conversion> m_to_base_p;
     /// The from-base conversion.
-    std::auto_ptr<Conversion> m_from_base;
+    std::auto_ptr<Conversion> m_from_base_p;
 };
 
 } // namespace AutoUnits

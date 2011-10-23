@@ -6,6 +6,8 @@
 //  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
 
+#include <QRegExp>
+
 #include "ConversionParser.h"
 #include "Types/Conversion.h"
 #include "Util/ExprParser.h"
@@ -290,7 +292,61 @@ public:
 QQueue<Token<State>*> Tokenize( const QString& str )
 {
     QQueue<Token<State>*> result;
-    (void)str;
+    QRegExp num_re( "[0-9]+\\.?|[0-9]*\\.[0-9]+" );
+
+    int i = 0;
+    while ( i < str.count() )
+    {
+        QChar c = str[i];
+        if ( c == '*' )
+        {
+            result.enqueue( new MultToken );
+            i++;
+        }
+        else if ( c == '/' )
+        {
+            result.enqueue( new DivToken );
+            i++;
+        }
+        else if ( c == '+' )
+        {
+            result.enqueue( new AddToken );
+            i++;
+        }
+        else if ( c == '-' )
+        {
+            result.enqueue( new SubToken );
+            i++;
+        }
+        else if ( c == '(' )
+        {
+            result.enqueue( new LParen<State> );
+            i++;
+        }
+        else if ( c == ')' )
+        {
+            result.enqueue( new RParen<State> );
+            i++;
+        }
+        else if ( c.isSpace() )
+        {
+            i++;
+        }
+        else if ( num_re.indexIn( str.mid( i ) ) == 0 )
+        {
+            result.enqueue( new ConstantToken( num_re.cap().toDouble() ) );
+            i += num_re.matchedLength();
+        }
+        else if ( str.mid( i, 5 ) == "value" )
+        {
+            result.enqueue( new ValueToken() );
+            i += 5;
+        }
+        else
+        {
+            throw Error( "Unmatched input: " + str.mid( i ) );
+        }
+    }
     return result;
 }
 
@@ -313,15 +369,6 @@ std::auto_ptr<Conversion> ParseConversion( const QString& str )
     }
 
     return std::auto_ptr<Conversion>( state.convstack.pop() );
-}
-
-//==============================================================================
-/// Parse the unit conversion specification in the given YAML node and store it
-/// in the given unit. 
-/// 
-void ParseConversion( YAML::Node& node, Unit *unit_p )
-{
-    (void)node; (void)unit_p;
 }
 
 } // namespace AutoUnits

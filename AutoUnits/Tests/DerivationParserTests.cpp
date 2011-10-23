@@ -274,4 +274,4 @@ private slots:
 
 #include "DerivationParserTests.moc"
 
-Test<TestDerivationParser> s_test;
+static Test<TestDerivationParser> s_test;

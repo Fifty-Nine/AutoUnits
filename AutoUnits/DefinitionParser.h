@@ -55,6 +55,8 @@ private:
     void ParseConvertedUnits( const YAML::Node& unit_list );
     void ParseConvertedUnit( const YAML::Node& unit );
 
+    void ParseConversions( const YAML::Node& node, Unit *unit_p );
+
     Dimension *DefineDimension( const YAML::Mark& mark, const QString& dim_name,
         const DimensionId& id, const QString& name );
     Unit *DefineUnit( 

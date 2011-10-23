@@ -2,7 +2,10 @@
 #define AUTO_UNITS_TEST_H
 
 #include <QtTest/QtTest>
+#include <iostream>
 #include <memory>
+
+#include "Util/Error.h"
 
 template<class T> 
 class Test
@@ -12,7 +15,15 @@ public:
     {
         std::auto_ptr<T> test_p( new T );
 
-        QTest::qExec( test_p.get(), QStringList() );
+        try
+        {
+            QTest::qExec( test_p.get(), QStringList() );
+        } 
+        catch ( const AutoUnits::Util::ErrorInterface& err )
+        {
+            std::cerr << "Unexpected exception thrown: " 
+                << qPrintable( (QString)err ) << std::endl;
+        }
     }
 };
 

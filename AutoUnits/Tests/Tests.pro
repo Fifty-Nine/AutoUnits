@@ -13,6 +13,7 @@ HEADERS += \
     Test.h \
 
 SOURCES += \
+    ConversionParserTests.cpp \
     DerivationParserTests.cpp \
     TestMain.cpp \
 

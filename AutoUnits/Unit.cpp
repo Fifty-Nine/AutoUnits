@@ -39,7 +39,7 @@ const Dimension *Unit::GetDimension() const
 /// 
 const Conversion *Unit::ToBase() const
 {
-    return m_to_base.get();
+    return m_to_base_p.get();
 }
 
 //==============================================================================
@@ -49,7 +49,7 @@ const Conversion *Unit::ToBase() const
 /// 
 Conversion *Unit::ToBase() 
 {
-    return m_to_base.get();
+    return m_to_base_p.get();
 }
 
 //==============================================================================
@@ -59,7 +59,7 @@ Conversion *Unit::ToBase()
 /// 
 const Conversion *Unit::FromBase() const
 {
-    return m_from_base.get();
+    return m_from_base_p.get();
 }
 
 //==============================================================================
@@ -69,7 +69,7 @@ const Conversion *Unit::FromBase() const
 /// 
 Conversion *Unit::FromBase() 
 {
-    return m_from_base.get();
+    return m_from_base_p.get();
 }
 
 //==============================================================================
@@ -79,7 +79,7 @@ Conversion *Unit::FromBase()
 /// 
 void Unit::SetToBase( std::auto_ptr<Conversion> conv_p )
 {
-    m_to_base.reset( conv_p.release() );
+    m_to_base_p.reset( conv_p.release() );
 }
 
 //==============================================================================
@@ -89,7 +89,7 @@ void Unit::SetToBase( std::auto_ptr<Conversion> conv_p )
 /// 
 void Unit::SetFromBase( std::auto_ptr<Conversion> conv_p )
 {
-    m_from_base.reset( conv_p.release() );
+    m_from_base_p.reset( conv_p.release() );
 }
 
 //==============================================================================
@@ -109,7 +109,26 @@ Dimension *Unit::GetDimension()
 /// \param [in] dimension_p The dimension for the unit.
 /// 
 Unit::Unit( const QString& name, Dimension *dimension_p ) : 
-    m_name( name ), m_dim_p( dimension_p )
+    m_name( name ), m_dim_p( dimension_p ), 
+    m_to_base_p( new Conversions::Value() ), 
+    m_from_base_p( new Conversions::Value() )
+{
+    m_dim_p->AddUnit( this );
+}
+
+//==============================================================================
+/// Constructor.
+/// 
+/// \param [in] name The name of the unit.
+/// \param [in] dimension_p The dimension for the unit.
+/// \param [in] to_base_p The conversion to the base unit.
+/// \param [in] from_base_p The conversion from the base unit.
+/// 
+Unit::Unit( const QString& name, Dimension *dimension_p, 
+    std::auto_ptr<Conversion> to_base_p, 
+    std::auto_ptr<Conversion> from_base_p ) : 
+    m_name( name ), m_dim_p( dimension_p ), 
+    m_to_base_p( to_base_p ), m_from_base_p( from_base_p )
 {
     m_dim_p->AddUnit( this );
 }

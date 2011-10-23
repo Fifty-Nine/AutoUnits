@@ -206,7 +206,7 @@ public:
     /// 
     virtual int Precedence() const 
     {
-        return 0;
+        return 1;
     }
 
     //==========================================================================
@@ -252,7 +252,7 @@ public:
     /// 
     virtual int Precedence() const 
     {
-        return 0;
+        return 1;
     }
 
     //==========================================================================
@@ -272,6 +272,14 @@ public:
         }
 
         std::auto_ptr<Conversion> lhs_p( state.convstack.pop() );
+
+        if ( rhs_p->IsConstant() && ( rhs_p->Eval( 0.0 ) == 0.0 ) )
+        {
+            // I used the wording here because probably won't detect
+            // every instance due to floating point fuzziness.
+            throw Error( 
+                "Division by zero detected in conversion expression." );
+        }
 
         if ( lhs_p->IsConstant() && rhs_p->IsConstant() )
         {

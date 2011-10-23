@@ -347,7 +347,11 @@ private slots:
         ConversionPtr from_p( ParseConversion( "value * 9.0 / 5 + 32" ) );
         ConversionPtr expect_p( ParseConversion( "value" ) );
 
-        QVERIFY( Compare( to_p->Compose( from_p ), expect_p ) );
+        ConversionPtr composed0_p( to_p->Compose( from_p->Clone() ) );
+        ConversionPtr composed1_p( from_p->Compose( to_p->Clone() ) );
+
+        QVERIFY( Compare( composed0_p, expect_p ) );
+        QVERIFY( Compare( composed1_p, expect_p ) );
     }
 };
 

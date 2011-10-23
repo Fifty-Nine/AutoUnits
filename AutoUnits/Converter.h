@@ -14,6 +14,8 @@
 namespace AutoUnits
 {
 
+namespace Conversions { class Conversion; }
+using Conversions::Conversion;
 class UnitSystem;
 
 //==============================================================================
@@ -23,18 +25,25 @@ class Converter
 {
 public:
     Converter( const UnitSystem *system_p );
+    ~Converter();
 
     bool CanConvert( const QString& from, const QString& to ) const;
     double Convert( const QString& from, const QString& to, double value ) 
         const;
+    const Conversion *GetConversion( const QString& from, const QString& to ) 
+        const;
 
 private:
+    /// Not implemented. This is here just as a reminder that system_p needs
+    /// to be immutable for the lifetime of the converter.
+    Converter( UnitSystem* );
+
     /// Our unit system.
     const UnitSystem *m_system_p;
 
     /// Our cached conversions.
     typedef QPair<QString,QString> CacheKey;
-    typedef QHash<CacheKey, double> Cache;
+    typedef QHash<CacheKey, Conversion*> Cache;
     mutable Cache m_cache;
 };
 

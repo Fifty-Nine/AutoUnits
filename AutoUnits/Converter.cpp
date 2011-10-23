@@ -10,11 +10,13 @@
 
 #include "Converter.h"
 #include "Dimension.h"
+#include "Types/Conversion.h"
 #include "Unit.h"
 #include "UnitSystem.h"
 
 namespace AutoUnits
 {
+
 
 namespace
 {
@@ -26,21 +28,35 @@ namespace
 /// \param [in] from The source unit.
 /// \param [in] to The destination unit.
 /// 
-double Compute( 
+std::auto_ptr<Conversion> Compute( 
     const UnitSystem *system_p, const QString& from, const QString& to )
 {
     (void)system_p; (void)from; (void)to;
-    return 1.0;
+    return std::auto_ptr<Conversion>( new Conversions::Value() );
 }
 
 }
 
 //==============================================================================
 /// Constructor.
+///
+/// \param [in] system_p The unit system.
+/// 
+/// \note This assumes that the unit system doesn't change for the lifetime
+///       of the converter. 
+/// 
 /// 
 Converter::Converter( const UnitSystem *system_p ) : 
     m_system_p( system_p )
 {
+}
+
+//==============================================================================
+/// Destructor.
+/// 
+Converter::~Converter()
+{
+    qDeleteAll( m_cache );
 }
 
 //==============================================================================
@@ -64,7 +80,7 @@ bool Converter::CanConvert( const QString& from, const QString& to ) const
     if ( to_p->GetDimension() == from_p->GetDimension() )
     {
         m_cache.insert( 
-            CacheKey( from, to ), Compute( m_system_p, from, to ) );
+            CacheKey( from, to ), Compute( m_system_p, from, to ).release() );
         return true;
     }
     return false;
@@ -88,16 +104,14 @@ double Converter::Convert(
     Cache::const_iterator it = m_cache.find( key );
     if ( it != m_cache.end() )
     {
-        return it.value() * value;
+        return it.value()->Eval( value );
     }
 
-    /// \todo We assume, for now, that all conversions are scalars.
-    double conversion = Compute( m_system_p, from, to );
+    Conversion *conv_p = Compute( m_system_p, from, to ).release();
 
-    m_cache.insert( key, conversion );
-    m_cache.insert( CacheKey( to, from ), 1.0 / conversion );
+    m_cache.insert( key, conv_p );
 
-    return conversion * value;
+    return conv_p->Eval( value );
 }
 
 } // namespace AutoUnits

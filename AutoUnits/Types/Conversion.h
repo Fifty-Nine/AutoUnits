@@ -51,11 +51,26 @@ public:
     virtual double Eval( double value ) const = 0;
 
     //==========================================================================
-    /// Compose the conversion with the given conversion. (like f(g(x)))
+    /// Call operator for conversions. Lets conversion objects be used as a 
+    /// function object.
+    /// 
+    /// \param [in] value The value to convert.
+    ///
+    /// \return The converted value.
+    ///
+    inline double operator()( double value ) const { return Eval( value ); }
+
+    //==========================================================================
+    /// Compose the conversion with the given conversion. 
+    /// 
+    /// For some compositions f, g: 
+    /// f->Compose( g )->Eval( x ) == f->Eval( g->Eval( x ) )
+    /// 
+    /// \param [in] other The conversion to compose with.
     /// 
     /// \return The composed conversion.
     /// 
-    virtual AutoPtr Compose( AutoPtr g_p ) const = 0;
+    virtual AutoPtr Compose( const Conversion& other ) const = 0;
 
     //==========================================================================
     /// Clone the conversion.
@@ -313,7 +328,7 @@ public:
     double Value() const; 
     void SetValue( double value ); 
     virtual double Eval( double value ) const;
-    virtual AutoPtr Compose( AutoPtr value ) const;
+    virtual AutoPtr Compose( const Conversion& other ) const;
     virtual bool IsConstant() const;
 
 private:
@@ -328,7 +343,7 @@ class Value : public Private::ImplementConversion<Value>
 { 
 public:
     virtual double Eval( double value ) const;
-    virtual AutoPtr Compose( AutoPtr value ) const;
+    virtual AutoPtr Compose( const Conversion& other ) const;
 }; 
 
 //==============================================================================
@@ -339,7 +354,7 @@ class AddOp : public Private::BinOp<AddOp>
 public:
     AddOp( AutoPtr lhs_p, AutoPtr rhs_p );
     virtual double Eval( double value ) const;
-    virtual AutoPtr Compose( AutoPtr value ) const;
+    virtual AutoPtr Compose( const Conversion& other ) const;
 };
 
 //==============================================================================
@@ -350,7 +365,7 @@ class SubOp : public Private::BinOp<SubOp>
 public:
     SubOp( AutoPtr lhs_p, AutoPtr rhs_p );
     virtual double Eval( double value ) const;
-    virtual AutoPtr Compose( AutoPtr value ) const;
+    virtual AutoPtr Compose( const Conversion& other ) const;
 };
 
 //==============================================================================
@@ -361,7 +376,7 @@ class MultOp : public Private::BinOp<MultOp>
 public:
     MultOp( AutoPtr lhs_p, AutoPtr rhs_p );
     virtual double Eval( double value ) const;
-    virtual AutoPtr Compose( AutoPtr value ) const;
+    virtual AutoPtr Compose( const Conversion& other ) const;
 };
 
 //==============================================================================
@@ -372,9 +387,12 @@ class DivOp : public Private::BinOp<DivOp>
 public:
     DivOp( AutoPtr lhs_p, AutoPtr rhs_p );
     virtual double Eval( double value ) const;
-    virtual AutoPtr Compose( AutoPtr value ) const;
-
+    virtual AutoPtr Compose( const Conversion& other ) const;
 };
+
+Conversion::AutoPtr Compose( const Conversion& f, const Conversion& g );
+Conversion::AutoPtr Compose( 
+    const Conversion::AutoPtr& f, const Conversion::AutoPtr& g );
 
 } // namespace Conversions
 

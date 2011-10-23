@@ -85,7 +85,7 @@ double Constant::Eval( double ) const
 /// 
 /// \return The composed conversion.
 /// 
-Conversion::AutoPtr Constant::Compose( Conversion::AutoPtr ) const
+Conversion::AutoPtr Constant::Compose( const Conversion& ) const
 {
     return Conversion::AutoPtr( new Constant( *this ) );
 }
@@ -113,13 +113,13 @@ double Value::Eval( double value ) const
 //==============================================================================
 /// Compose the value with the given expression.
 /// 
-/// \param [in] value_p The value to compose.
+/// \param [in] value The value to compose with.
 /// 
 /// \return The composed value.
 /// 
-Conversion::AutoPtr Value::Compose( Conversion::AutoPtr value_p ) const
+Conversion::AutoPtr Value::Compose( const Conversion& value ) const
 {
-    return value_p;
+    return value.Clone();
 }
 
 //==============================================================================
@@ -149,14 +149,14 @@ double AddOp::Eval( double value ) const
 //==============================================================================
 /// Compose the conversion for the given value.
 /// 
-/// \param [in] value_p The value to compose with.
+/// \param [in] value The value to compose with.
 /// 
 /// \return The composed conversion.
 /// 
-Conversion::AutoPtr AddOp::Compose( Conversion::AutoPtr value_p ) const
+Conversion::AutoPtr AddOp::Compose( const Conversion& value ) const
 {
-    Conversion::AutoPtr left_p( m_lhs_p->Compose( value_p->Clone() ) );
-    Conversion::AutoPtr right_p( m_rhs_p->Compose( value_p ) );
+    Conversion::AutoPtr left_p( m_lhs_p->Compose( value ) );
+    Conversion::AutoPtr right_p( m_rhs_p->Compose( value ) );
 
     if ( left_p->IsConstant() && right_p->IsConstant() )
     {
@@ -194,14 +194,14 @@ double SubOp::Eval( double value ) const
 //==============================================================================
 /// Compose the conversion for the given value.
 /// 
-/// \param [in] value_p The value to compose with.
+/// \param [in] value The value to compose with.
 /// 
 /// \return The composed conversion.
 /// 
-Conversion::AutoPtr SubOp::Compose( Conversion::AutoPtr value_p ) const
+Conversion::AutoPtr SubOp::Compose( const Conversion& value ) const
 {
-    Conversion::AutoPtr left_p( m_lhs_p->Compose( value_p->Clone() ) );
-    Conversion::AutoPtr right_p( m_rhs_p->Compose( value_p ) );
+    Conversion::AutoPtr left_p( m_lhs_p->Compose( value ) );
+    Conversion::AutoPtr right_p( m_rhs_p->Compose( value ) );
 
     if ( left_p->IsConstant() && right_p->IsConstant() )
     {
@@ -236,14 +236,14 @@ double MultOp::Eval( double value ) const
 //==============================================================================
 /// Compose the conversion for the given value.
 /// 
-/// \param [in] value_p The value to compose with.
+/// \param [in] value The value to compose with.
 /// 
 /// \return The composed conversion.
 /// 
-Conversion::AutoPtr MultOp::Compose( Conversion::AutoPtr value_p ) const
+Conversion::AutoPtr MultOp::Compose( const Conversion& value ) const
 {
-    Conversion::AutoPtr left_p( m_lhs_p->Compose( value_p->Clone() ) );
-    Conversion::AutoPtr right_p( m_rhs_p->Compose( value_p ) );
+    Conversion::AutoPtr left_p( m_lhs_p->Compose( value ) );
+    Conversion::AutoPtr right_p( m_rhs_p->Compose( value ) );
 
     if ( left_p->IsConstant() && right_p->IsConstant() )
     {
@@ -278,14 +278,14 @@ double DivOp::Eval( double value ) const
 //==============================================================================
 /// Compose the conversion for the given value.
 /// 
-/// \param [in] value_p The value to compose with.
+/// \param [in] value The value to compose with.
 /// 
 /// \return The composed conversion.
 /// 
-Conversion::AutoPtr DivOp::Compose( Conversion::AutoPtr value_p ) const
+Conversion::AutoPtr DivOp::Compose( const Conversion& value ) const
 {
-    Conversion::AutoPtr left_p( m_lhs_p->Compose( value_p->Clone() ) );
-    Conversion::AutoPtr right_p( m_rhs_p->Compose( value_p ) );
+    Conversion::AutoPtr left_p( m_lhs_p->Compose( value ) );
+    Conversion::AutoPtr right_p( m_rhs_p->Compose( value ) );
 
     if ( left_p->IsConstant() && right_p->IsConstant() )
     {
@@ -294,6 +294,33 @@ Conversion::AutoPtr DivOp::Compose( Conversion::AutoPtr value_p ) const
     }
 
     return Conversion::AutoPtr( new DivOp( left_p, right_p ) );
+}
+
+//==============================================================================
+/// Convenience function to compose two conversions.
+/// 
+/// \param [in] f The f(x) conversion.
+/// \param [in] g The g(x) conversion.
+/// 
+/// \return A conversion for f(g(x)).
+/// 
+Conversion::AutoPtr Compose( const Conversion& f, const Conversion& g )
+{
+    return f.Compose( g );
+}
+
+//==============================================================================
+/// Convenience function to compose two conversions.
+/// 
+/// \param [in] f_p The f(x) conversion.
+/// \param [in] g_p The g(x) conversion.
+/// 
+/// \return A conversion for f(g(x)).
+/// 
+Conversion::AutoPtr Compose( 
+    const Conversion::AutoPtr& f, const Conversion::AutoPtr& g )
+{
+    return f->Compose( *g );
 }
 
 } // namespace Conversions

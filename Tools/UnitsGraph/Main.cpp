@@ -47,6 +47,11 @@ public:
 
         out << Indent(2) << unit.Name() << ";\n";
         
+        if ( !unit.IsBase() )
+        {
+            return;
+        }
+
         QList<const Unit*> other_units( dim.Units() );
         for ( int i = 0; i < other_units.count(); ++i )
         {
@@ -57,17 +62,19 @@ public:
 
             const Unit& other = *other_units[i];
 
-            double c = m_converter.Convert( unit.Name(), other.Name(), 1.0 );
+            double c = m_converter.Convert( other.Name(), unit.Name(), 1.0 );
 
-            out << Indent(2) << unit.Name() << " -> " << other.Name() 
-                << "[ label=\"" << c << "\" ];\n";
+            out << Indent(2) << unit.Name() << " -- " << other.Name() 
+                << "[ label=\"" << c << "\"";
+
+            out << " ];\n";
         }
 
     }
 
     void Graph( QTextStream& out, const UnitSystem& system )
     {
-        out << "digraph UnitSystem {\n";
+        out << "graph UnitSystem {\n";
 
         QList<const Unit*> units = system.Units();
         for ( int i = 0; i < units.count(); ++i )

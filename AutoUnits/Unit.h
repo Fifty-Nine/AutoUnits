@@ -28,6 +28,7 @@ public:
     const Dimension *GetDimension() const;
     const Conversion *ToBase() const;
     const Conversion *FromBase() const;
+    bool IsBase() const;
 
     //==========================================================================
     /// Mutable interface.

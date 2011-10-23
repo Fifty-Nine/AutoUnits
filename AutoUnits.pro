@@ -2,7 +2,6 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     AutoUnits \
-    AutoUnitsCompiler \
     Tools \
 
 doxy.commands = doxygen Doxyfile

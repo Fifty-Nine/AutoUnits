@@ -1,60 +1,474 @@
 BaseDimensions:
-  - unit: Second
-    name: Time
+  - name: Length
+    unit: Meter
+
+  - name: Mass
+    unit: Kilogram
+
+  - name: Time
+    unit: Second
+
+  - name: ElectricCurrent
+    unit: Ampere
+
+  - name: Temperature
+    unit: Kelvin
+
+  - name: Candela
+    unit: LuminousIntensity
+
+  - name: AmountOfSubstance
+    unit: Mole
   
-  - unit: Kilogram
-    name: Mass
+  - name: Angle
+    unit: Radian
 
-  - unit: Meter
-    name: Distance
-
-  - unit: Celsius
-    name: Temperature
+  - name: SolidAngle
+    unit: Steradian
 
 DerivedDimensions:
-  - name: Speed
-    unit: MetersPerSecond
-    derivation: Meters / Second
-  
-  - name: Area
-    unit: MeterSquared
-    derivation: Meter^2
-
-  - name: Acceleration
-    unit: MetersPerSecondSquared
-    derivation: Meters / Second^2
-
+################################################################################
+# Derived dimensions with named units.
+################################################################################
   - name: Frequency
     unit: Hertz
     derivation: 1 / Second
 
-ConvertedUnits:
-  - name: Pound
-    dimension: Mass
-    conversion: 0.45359237
+  - name: Force
+    unit: Newton
+    derivation: Kilogram * Meter / Second^2
+
+  - name: Pressure
+    unit: Pascal
+    derivation: Newton / Meter^2
+
+  - name: Energy
+    unit: Joule
+    derivation: Newton * Meter
+
+  - name: Power
+    unit: Watt
+    derivation: Joule / Second
+
+  - name: ElectricCharge
+    unit: Coulomb
+    derivation: Second * Ampere
+
+  - name: Voltage
+    unit: Volt
+    derivation: Watt / Ampere
+
+  - name: ElectricCapacitance
+    unit: Farad
+    derivation: Coulomb / Volt
+
+  - name: ElectricResistance
+    unit: Ohm
+    derivation: Volt / Ampere
+
+  - name: ElectricConductance
+    unit: Siemens
+    derivation: 1 / Ohm
+
+  - name: MagneticFlux
+    unit: Weber
+    derivation: Joules / Ampere
+
+  - name: MagnetizingFieldStrength
+    unit: Tesla
+    derivation: Weber / Meter^2
+
+  - name: Inductance
+    unit: Henry
+    derivation: Weber / Ampere
+
+  - name: LuminousFlux
+    unit: Lumen
+    derivation: Candela / Steradian
+
+  - name: Illuminance
+    unit: Lux
+    derivation: Lumen / Meter^2
+
+  - name: CatalyticActivity
+    unit: Katal
+    derivation: Mole / Second
+
+################################################################################
+# Convenience derived dimensions with no SI named base unit.
+################################################################################
+  - name: Area
+    unit: MeterSquared
+    derivation: Meter^2
+
+  - name: Volume
+    unit: MeterCubed
+    derivation: Meter^3
+
+  - name: Speed
+    unit: MeterPerSecond
+    derivation: Meter / Second
+
+  - name: VolumetricFlow
+    unit: MeterCubedPerSecond
+    derivation: Meter^3 / Second
+
+  - name: Acceleration
+    unit: MeterPerSecondSquared
+    derivation: Meter / Second^2
+
+  - name: Jerk
+    unit: MeterPerSecondCubed
+    derivation: Meter / Second^3
+
+  - name: AngularVelocity
+    unit: RadiansPerSecond
+    derivation: Radian / Second
+
+  - name: Momentum
+    unit: NewtonSecond
+    derivation: Newton * Second
+
+  - name: AngularMomentum
+    unit: NewtonMeterSecond
+    derivation: Newton * Meter * Second
+
+  # Torque is kinda funky. We usually call the units "newton-meters" but in
+  # it's really newton-meter-radians. Of course, radians are dimensionless, so
+  # it's not so big a deal. Unfortunately, we can't really handle dimensionless
+  # quantities that aren't just scalars, so we sneakily divide by radians here.
+  - name: Torque
+    unit: NewtonMeter
+    derivation: Newton * Meter / Radian
+
+  - name: Yank
+    unit: NewtonPerSecond
+    derivation: Newton / Second
+   
+  - name: Wavenumber
+    unit: ReciprocalMeter
+    derivation: 1 / Meter
+
+  - name: AreaDensity
+    unit: KilogramPerMeterSquared
+    derivation: Kilogram / Meter^2
+
+  - name: Density
+    unit: KilogramPerMeterCubed
+    derivation: Kilogram / Meter^3
+
+  - name: SpecificVolume
+    unit: MeterCubedPerKilogram
+    derivation: Meter^3 / Kilogram
+
+  - name: Concentration
+    unit: MolePerMeterCubed
+    derivation: Mole / Meter^3
+
+  - name: MolarVolume
+    unit: MeterCubedPerMole
+    derivation: Meter^3 / Mole
+
+  - name: Action
+    unit: JouleSecond
+    derivation: Joule * Second
+
+  - name: HeatCapacity
+    unit: JoulePerKelvin
+    derivation: Joule / Kelvin
+
+  - name: MolarHeatCapacity
+    unit: JoulePerKelvinMole
+    derivation: Joule / (Kelvin * Mole)
+
+  - name: SpecificHeatCapacity
+    unit: JoulePerKilogramKelvin
+    derivation: Joule / (Kilogram * Kelvin)
+
+  - name: MolarEnergy
+    unit: JoulePerMole
+    derivation: Joule / Mole
+
+  - name: SpecificEnergy
+    unit: JoulePerKilogram
+    derivation: Joule / Kilogram
+
+  - name: EnergyDensity
+    unit: JoulePerMeterCubed
+    derivation: Joule / Meter^3
+
+  - name: SurfaceTension
+    unit: NewtonPerMeter
+    derivation: Newton / Meter
+
+  - name: HeatFluxDensity
+    unit: WattPerMeterSquared
+    derivation: Watt / Meter^2
+   
+  - name: ThermalConductivity
+    unit: WattPerMeterKelvin
+    derivation: Watt / (Meter * Kelvin)
+
+  - name: KinematicViscosity
+    unit: MeterSquaredPerSecond
+    derivation: Meter^2 / Second
+
+  - name: DynamicViscosity
+    unit: PascalSecond
+    derivation: Pascal * Second
     
+  - name: ElectricDisplacementField
+    unit: CoulombPerMeterSquared
+    derivation: Coulomb / Meter^2
+
+  - name: ElectricChargeDensity
+    unit: CoulombPerMeterCubed
+    derivation: Coulomb / Meter^3
+
+  - name: ElectricCurrentDensity
+    unit: AmperePerMeterSquared
+    derivation: Ampere / Meter^2
+
+  - name: ElectricConductivity
+    unit: SiemensPerMeter
+    derivation: Siemens / Meter
+
+  - name: MolarConductivity
+    unit: SiemensMeterSquaredPerMole
+    derivation: Siemens * Meter^2 / Mole
+
+  - name: Permittivity
+    unit: FaradPerMeter
+    derivation: Farad / Meter
+
+  - name: Permeability
+    unit: HenryPerMeter
+    derivation: Henry / Meter
+
+  - name: ElectricFieldStrength
+    unit: VoltPerMeter
+    derivation: Volt / Meter
+
+  - name: MagneticFieldStrength
+    unit: AmperePerMeter
+    derivation: Ampere / Meter
+
+  - name: Luminance
+    unit: CandelaPerMeterSquared
+    derivation: Candela / Meter^2
+
+  - name: LuminousEnergy
+    unit: LumenSecond
+    derivation: Lumen * Second
+
+  - name: LuminousExposure
+    unit: LuxSecond
+    derivation: Lux * Second
+
+  - name: Exposure
+    unit: CoulombPerKilogram
+    derivation: Coulomb / Kilogram
+
+  - name: Resistivity
+    unit: OhmMeter
+    derivation: Ohm * Meter
+
+ConvertedUnits:
+  - name: Inch
+    dimension: Length 
+    conversion: 0.0254
+
   - name: Foot
-    dimension: Distance
+    dimension: Length
     conversion: 0.3048
 
-  - name: Fahrenheit
-    dimension: Temperature
-    conversion: ["(value - 32) * 5.0 / 9.0", "value * 9.0 / 5 + 32"]
+  - name: Yard
+    dimension: Length
+    conversion: 0.9144
 
-  - name: Minute
-    dimension: Time
-    conversion: 60
+  - name: Mile
+    dimension: Length
+    conversion: 1609.344
 
-  - name: Hour
-    dimension: Time
-    conversion: 3600
+  - name: Link
+    dimension: Length
+    conversion: 0.2011684
+
+  - name: Rod
+    dimension: Length
+    conversion: 5.029210
+
+  - name: Chain
+    dimension: Length
+    conversion: 20.11684
+
+  - name: Centimeter
+    dimension: Length
+    conversion: 0.01
+
+  - name: SquareInch
+    dimension: Area
+    conversion: 0.00064516
+
+  - name: SquareFoot
+    dimension: Area
+    conversion: 0.09290304
+
+  - name: SquareYard
+    dimension: Area
+    conversion: 0.83612736
+
+  - name: SquareMile
+    dimension: Area
+    conversion: 2589988.110336
+
+  - name: SquareCentimeter
+    dimension: Area
+    conversion: 0.0001
+
+  - name: SquareRod
+    dimension: Area
+    conversion: 25.29295
+
+  - name: SquareChain
+    dimension: Area
+    conversion: 404.6873
 
   - name: Acre
     dimension: Area
-    conversion: 4046.85642 
+    conversion: 4046.873
 
-  - name: MilesPerHour
-    dimension: Speed
-    conversion: 0.44704
+  - name: Hectare
+    dimension: Area
+    conversion: 10000
 
+  - name: CubicInch
+    dimension: Volume
+    conversion: 0.000016387064
+
+  - name: CubicFoot
+    dimension: Volume
+    conversion: 0.028316846592
+
+  - name: CubicYard
+    dimension: Volume
+    conversion: 0.764554857984
+
+  - name: CubicCentimeter
+    dimension: Volume
+    conversion: 0.000001
+
+  - name: CubicDecimeter
+    dimension: Volume
+    conversion: 0.001
+
+  - name: Pint
+    dimension: Volume
+    conversion: 0.0005506105
+
+  - name: Quart
+    dimension: Volume
+    conversion: 0.001101221
+
+  - name: Peck
+    dimension: Volume
+    conversion: 0.008809768
+
+  - name: Bushel
+    dimension: Volume
+    conversion: 0.03523907
+
+  - name: Liter
+    dimension: Volume
+    conversion: 0.001
+
+  - name: Ounce
+    dimension: Mass
+    conversion: 0.028349523125
+
+  - name: Pound
+    dimension: Mass
+    conversion: 0.45359237
+
+  - name: ShortHundredweight
+    dimension: Mass
+    conversion: 45.359237
+
+  - name: ShortTon
+    dimension: Mass
+    conversion: 907.18474
+
+  - name: LongTon
+    dimension: Mass
+    conversion: 1016.0469088
+
+  - name: MetricTon
+    dimension: Mass
+    conversion: 1000
+
+  - name: Grain
+    dimension: Mass
+    conversion: 0.00006479891
+
+  - name: Scruple
+    dimension: Mass
+    conversion: 0.0012959782
+
+  - name: Pennyweight
+    dimension: Mass
+    conversion: 0.00155517384
+
+  - name: Dram
+    dimension: Mass
+    conversion: 0.0017718451953125
+
+  - name: ApothDram
+    dimension: Mass
+    conversion: 0.0038879346
+
+  - name: TroyOunce
+    dimension: Mass
+    conversion: 0.0311034768
+
+  - name: TroyPound
+    dimension: Mass
+    conversion: 0.3732417216
+
+  - name: Gram
+    dimension: Mass
+    conversion: 0.001
+
+  - name: Milligram
+    dimension: Mass
+    conversion: 0.000001
+
+Synonyms: 
+  Ampere: [ Amp ]
+  Force: [ Weight ]
+  Pressure: [ Stress ]
+  Energy: [ Work, Heat ]
+  Power: [ RadiantFlux ]
+  ElectricCharge: [ Charge ]
+  Voltage: 
+    - ElectricPotentialDifference 
+    - PotentialDifference
+    - ElectromotiveForce
+  ElectricCapacitance: [ Capacitance ]
+  ElectricResistance: [ Resistance, Impedance, Reactance ]
+  ElectricConductance: [ Conductance ]
+  MagneticFieldStrength: [ MagneticFluxDensity ]
+  Speed: [ Velocity ]
+
+  # Who comes up with this stuff?
+  Jerk: [ Jolt ]
+
+  Momentum: [ Impulse ]
+  Torque: [ MomentOfForce ]
+  HeatCapacity: [ Entropy ]
+  MolarHeatCapacity: [ MolarEntropy ]
+  SpecificHeatCapacity: [ SpecificEntropy ]
+  HeatFluxDensity: [ Irradiance ]
+  KinematicViscosity: [ DiffusionCoefficient ]
+  ElectricDisplacementField: [ DisplacementField, PolarizationVector ]
+  ElectricConductivity: [ Conductivity ]
 

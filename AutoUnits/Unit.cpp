@@ -42,15 +42,6 @@ const Conversion *Unit::ToBase() const
     return m_to_base_p.get();
 }
 
-//==============================================================================
-/// Get the conversion to the base unit.
-/// 
-/// \return The conversion.
-/// 
-Conversion *Unit::ToBase() 
-{
-    return m_to_base_p.get();
-}
 
 //==============================================================================
 /// Get the conversion from the base unit.
@@ -60,6 +51,26 @@ Conversion *Unit::ToBase()
 const Conversion *Unit::FromBase() const
 {
     return m_from_base_p.get();
+}
+
+//==============================================================================
+/// Check whether this is the base unit of the dimension.
+/// 
+/// \return True if this is the base unit.
+/// 
+bool Unit::IsBase() const
+{
+    return m_dim_p->GetBaseUnit() == this;
+}
+
+//==============================================================================
+/// Get the conversion to the base unit.
+/// 
+/// \return The conversion.
+/// 
+Conversion *Unit::ToBase() 
+{
+    return m_to_base_p.get();
 }
 
 //==============================================================================

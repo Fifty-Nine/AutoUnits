@@ -49,6 +49,11 @@ public:
     virtual double Eval( double value ) const = 0;
 
     //==========================================================================
+    /// Clone the conversion.
+    /// 
+    virtual std::auto_ptr<Conversion> Clone() const = 0;
+
+    //==========================================================================
     /// Test whether the node is a constant.
     /// 
     /// \return True if the node is a constant.
@@ -56,12 +61,6 @@ public:
     virtual bool IsConstant() const { return false; }
 
     static std::auto_ptr<Conversion> ScaleFactor( double factor );
-
-private:
-    /// Not implemented.
-    Conversion( const Conversion& );
-    /// Not implemented.
-    Conversion& operator=( const Conversion& );
 };
 
 class Constant;
@@ -200,6 +199,18 @@ public:
     { 
         visitor.Visit( *(const C*)this ); 
     }
+
+    //==========================================================================
+    /// Clone the conversion tree.
+    /// 
+    /// \return The cloned conversion.
+    /// 
+    std::auto_ptr<Conversion> Clone() const
+    {
+        const C& other( static_cast<const C&>( *this ) );
+        C* result = new C( other );
+        return std::auto_ptr<Conversion>( result );
+    }
 };
 
 //==========================================================================
@@ -255,6 +266,15 @@ public:
     }
 
 protected:
+    //==========================================================================
+    /// Copy constructor.
+    /// 
+    BinOp( const BinOp& other ) : 
+        m_lhs_p( other.m_lhs_p->Clone() ), 
+        m_rhs_p( other.m_rhs_p->Clone() )
+    {
+    }
+
     /// The left-hand side.
     std::auto_ptr<Conversion> m_lhs_p;
 

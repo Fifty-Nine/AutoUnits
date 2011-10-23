@@ -28,11 +28,17 @@ namespace
 /// \param [in] from The source unit.
 /// \param [in] to The destination unit.
 /// 
-std::auto_ptr<Conversion> Compute( 
+Conversion::AutoPtr Compute( 
     const UnitSystem *system_p, const QString& from, const QString& to )
 {
-    (void)system_p; (void)from; (void)to;
-    return std::auto_ptr<Conversion>( new Conversions::Value() );
+    const Unit *from_p( system_p->GetUnit( from ) );
+    const Unit *to_p( system_p->GetUnit( to ) );
+
+    assert( from_p );
+    assert( to_p );
+    assert( from_p->GetDimension() == to_p->GetDimension() );
+    
+    return Compose( *to_p->FromBase(), *from_p->ToBase() );
 }
 
 }

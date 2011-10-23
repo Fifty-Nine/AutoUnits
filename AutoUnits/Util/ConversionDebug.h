@@ -5,7 +5,6 @@
 /// 
 /// Debugging utilities for the conversion type.
 ///
-//  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
 
 class QDebug;

@@ -3,7 +3,6 @@
 /// 
 /// Contains the main function for the application.
 ///
-//  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
 
 #include <iostream>

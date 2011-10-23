@@ -3,7 +3,6 @@
 /// 
 /// Source file for the derivation parser.
 ///
-//  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
 
 #include <cassert>

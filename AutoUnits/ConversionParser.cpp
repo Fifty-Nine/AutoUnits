@@ -3,7 +3,6 @@
 /// 
 /// Source file for the conversion function parser.
 ///
-//  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
 
 #include <QRegExp>

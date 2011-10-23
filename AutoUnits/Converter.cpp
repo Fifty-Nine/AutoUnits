@@ -3,7 +3,6 @@
 /// 
 /// Source file for the AutoUnits::Converter class.
 ///
-//  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
 
 #include <cassert>

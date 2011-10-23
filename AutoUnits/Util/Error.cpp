@@ -3,7 +3,6 @@
 /// 
 /// Source file for the AutoUnits::Util::Error class.
 ///
-//  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
 
 #include "Util/Error.h"

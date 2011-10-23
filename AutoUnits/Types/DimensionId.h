@@ -5,7 +5,6 @@
 /// 
 /// Header file for the DimensionId type.
 ///
-//  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
 
 #include <QHash>

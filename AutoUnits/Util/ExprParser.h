@@ -5,7 +5,6 @@
 /// 
 /// An object oriented expression parsing utility.
 ///
-//  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
 
 #include <cassert>

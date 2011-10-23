@@ -5,7 +5,6 @@
 /// 
 /// Header file for the AutoUnits::Dimension class.
 ///
-//  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
 
 #include <QHash>

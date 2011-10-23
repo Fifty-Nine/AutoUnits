@@ -3,7 +3,6 @@
 /// 
 /// Source file for the conversion debug utilities.
 ///
-//  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
 
 #include <QDebug>

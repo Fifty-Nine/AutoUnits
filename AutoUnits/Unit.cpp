@@ -3,7 +3,6 @@
 /// 
 /// Header file for the Unit class.
 ///
-//  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
 
 #include "Dimension.h"

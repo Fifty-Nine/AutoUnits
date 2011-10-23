@@ -5,7 +5,6 @@
 /// 
 /// Functions to simplify using Yaml-cpp with Qt objects.
 /// 
-//  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
 
 #include <QList>

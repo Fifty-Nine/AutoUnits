@@ -3,7 +3,6 @@
 /// 
 /// Source file for the conversion type.
 ///
-//  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
 
 #include "Types/Conversion.h"

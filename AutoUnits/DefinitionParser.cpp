@@ -3,7 +3,6 @@
 /// 
 /// Source file for the unit definition parser.
 ///
-//  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
 
 #include <QDebug>

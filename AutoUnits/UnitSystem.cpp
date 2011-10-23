@@ -3,7 +3,6 @@
 /// 
 /// Header file for the AutoUnits::UnitSystem class.
 ///
-//  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
 
 #include <cassert>

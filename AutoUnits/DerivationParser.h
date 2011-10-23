@@ -5,7 +5,6 @@
 /// 
 /// Header file for the derivation parsing functions.
 ///
-//  Copyright 2011 AgLeader Technology, Inc.
 //==============================================================================
 
 #include "Types/DimensionId.h"

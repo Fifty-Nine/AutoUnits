@@ -340,6 +340,15 @@ private slots:
     {
         QVERIFY( Throws( "value / 0.0" ) );
     }
+
+    void ConversionComposition()
+    {
+        ConversionPtr to_p( ParseConversion( "(value - 32) * 5.0 / 9.0" ) );
+        ConversionPtr from_p( ParseConversion( "value * 9.0 / 5 + 32" ) );
+        ConversionPtr expect_p( ParseConversion( "value" ) );
+
+        QVERIFY( Compare( to_p->Compose( from_p ), expect_p ) );
+    }
 };
 
 #include "ConversionParserTests.moc"

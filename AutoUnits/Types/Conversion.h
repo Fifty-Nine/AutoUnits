@@ -26,6 +26,8 @@ class Conversion
 public:
     Conversion();
     virtual ~Conversion();
+
+    typedef std::auto_ptr<Conversion> AutoPtr;
     
     //==========================================================================
     /// Accept a visitor to the node.
@@ -49,9 +51,16 @@ public:
     virtual double Eval( double value ) const = 0;
 
     //==========================================================================
+    /// Compose the conversion with the given conversion. (like f(g(x)))
+    /// 
+    /// \return The composed conversion.
+    /// 
+    virtual AutoPtr Compose( AutoPtr g_p ) const = 0;
+
+    //==========================================================================
     /// Clone the conversion.
     /// 
-    virtual std::auto_ptr<Conversion> Clone() const = 0;
+    virtual AutoPtr Clone() const = 0;
 
     //==========================================================================
     /// Test whether the node is a constant.
@@ -60,7 +69,7 @@ public:
     /// 
     virtual bool IsConstant() const { return false; }
 
-    static std::auto_ptr<Conversion> ScaleFactor( double factor );
+    static AutoPtr ScaleFactor( double factor );
 };
 
 class Constant;
@@ -205,11 +214,9 @@ public:
     /// 
     /// \return The cloned conversion.
     /// 
-    std::auto_ptr<Conversion> Clone() const
+    AutoPtr Clone() const
     {
-        const C& other( static_cast<const C&>( *this ) );
-        C* result = new C( other );
-        return std::auto_ptr<Conversion>( result );
+        return AutoPtr( new C( *(const C*)this ) );
     }
 };
 
@@ -222,13 +229,15 @@ template<class C>
 class BinOp : public ImplementConversion<C>
 {
 public:
+    typedef typename ImplementConversion<C>::AutoPtr AutoPtr;
+
     //==========================================================================
     /// Constructor.
     /// 
     /// \param [in] lhs_p The left-hand side.
     /// \param [in] rhs_p The right-hand side. 
     ///
-    BinOp( std::auto_ptr<Conversion> lhs_p, std::auto_ptr<Conversion> rhs_p ) : 
+    BinOp( AutoPtr lhs_p, AutoPtr rhs_p ) : 
         m_lhs_p( lhs_p ), m_rhs_p( rhs_p )
     {
     }
@@ -265,6 +274,16 @@ public:
         return m_rhs_p.get();
     }
 
+    //==========================================================================
+    /// Check whether the conversion has a constant value.
+    /// 
+    /// \return True if the conversion is constant.
+    /// 
+    virtual bool IsConstant() const 
+    {
+        return m_lhs_p->IsConstant() && m_rhs_p->IsConstant();
+    }
+
 protected:
     //==========================================================================
     /// Copy constructor.
@@ -276,10 +295,10 @@ protected:
     }
 
     /// The left-hand side.
-    std::auto_ptr<Conversion> m_lhs_p;
+    AutoPtr m_lhs_p;
 
     /// The right-hand side.
-    std::auto_ptr<Conversion> m_rhs_p;
+    AutoPtr m_rhs_p;
 };
 
 }
@@ -294,6 +313,7 @@ public:
     double Value() const; 
     void SetValue( double value ); 
     virtual double Eval( double value ) const;
+    virtual AutoPtr Compose( AutoPtr value ) const;
     virtual bool IsConstant() const;
 
 private:
@@ -308,6 +328,7 @@ class Value : public Private::ImplementConversion<Value>
 { 
 public:
     virtual double Eval( double value ) const;
+    virtual AutoPtr Compose( AutoPtr value ) const;
 }; 
 
 //==============================================================================
@@ -316,8 +337,9 @@ public:
 class AddOp : public Private::BinOp<AddOp>
 {
 public:
-    AddOp( std::auto_ptr<Conversion> lhs_p, std::auto_ptr<Conversion> rhs_p );
+    AddOp( AutoPtr lhs_p, AutoPtr rhs_p );
     virtual double Eval( double value ) const;
+    virtual AutoPtr Compose( AutoPtr value ) const;
 };
 
 //==============================================================================
@@ -326,8 +348,9 @@ public:
 class SubOp : public Private::BinOp<SubOp>
 {
 public:
-    SubOp( std::auto_ptr<Conversion> lhs_p, std::auto_ptr<Conversion> rhs_p );
+    SubOp( AutoPtr lhs_p, AutoPtr rhs_p );
     virtual double Eval( double value ) const;
+    virtual AutoPtr Compose( AutoPtr value ) const;
 };
 
 //==============================================================================
@@ -336,8 +359,9 @@ public:
 class MultOp : public Private::BinOp<MultOp>
 {
 public:
-    MultOp( std::auto_ptr<Conversion> lhs_p, std::auto_ptr<Conversion> rhs_p );
+    MultOp( AutoPtr lhs_p, AutoPtr rhs_p );
     virtual double Eval( double value ) const;
+    virtual AutoPtr Compose( AutoPtr value ) const;
 };
 
 //==============================================================================
@@ -346,8 +370,10 @@ public:
 class DivOp : public Private::BinOp<DivOp>
 {
 public:
-    DivOp( std::auto_ptr<Conversion> lhs_p, std::auto_ptr<Conversion> rhs_p );
+    DivOp( AutoPtr lhs_p, AutoPtr rhs_p );
     virtual double Eval( double value ) const;
+    virtual AutoPtr Compose( AutoPtr value ) const;
+
 };
 
 } // namespace Conversions

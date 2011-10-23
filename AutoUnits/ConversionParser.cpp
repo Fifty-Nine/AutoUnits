@@ -365,6 +365,8 @@ QQueue<Token<State>*> Tokenize( const QString& str )
 /// 
 /// \param [in] str The conversion string.
 /// 
+/// \todo The constant folding on this is not optimal.
+/// 
 std::auto_ptr<Conversion> ParseConversion( const QString& str )
 {
     State state( str );
@@ -376,7 +378,7 @@ std::auto_ptr<Conversion> ParseConversion( const QString& str )
         throw Error( "Some kinda syntax error occurred." );
     }
 
-    return std::auto_ptr<Conversion>( state.convstack.pop() );
+    return Conversion::AutoPtr( state.convstack.pop() );
 }
 
 } // namespace AutoUnits

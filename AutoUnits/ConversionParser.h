@@ -17,11 +17,6 @@ namespace AutoUnits
 
 namespace Conversions { class Conversion; }
 
-//==============================================================================
-/// Parse the conversion string.
-/// 
-/// \return The parsed conversion.
-/// 
 std::auto_ptr<Conversions::Conversion> ParseConversion( const QString& str );
 
 } // namespace AutoUnits

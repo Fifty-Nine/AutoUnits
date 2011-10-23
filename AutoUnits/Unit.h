@@ -8,6 +8,8 @@
 
 #include <QString>
 
+#include "Types/Conversion.h"
+
 namespace AutoUnits
 {
 
@@ -24,13 +26,17 @@ public:
     //==========================================================================
     QString Name() const;
     const Dimension *GetDimension() const;
-    QString Conversion() const;
+    const Conversion *ToBase() const;
+    const Conversion *FromBase() const;
 
     //==========================================================================
     /// Mutable interface.
     //==========================================================================
     Dimension *GetDimension();
-    void SetConversion( const QString& conversion );
+    Conversion *ToBase();
+    Conversion *FromBase();
+    void SetToBase( std::auto_ptr<Conversion> conv_p );
+    void SetFromBase( std::auto_ptr<Conversion> conv_p );
 
 private:
     Unit( const QString& name, Dimension *dimension_p );
@@ -41,8 +47,10 @@ private:
     QString m_name;
     /// The unit's dimension.
     Dimension *m_dim_p;
-    /// The unit's conversion specification.
-    QString m_conversion;
+    /// The to-base conversion.
+    std::auto_ptr<Conversion> m_to_base;
+    /// The from-base conversion.
+    std::auto_ptr<Conversion> m_from_base;
 };
 
 } // namespace AutoUnits

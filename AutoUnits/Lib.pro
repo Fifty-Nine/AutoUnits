@@ -5,6 +5,7 @@ include( ../Common.pri )
 TARGET = AutoUnits
 
 HEADERS += \
+    ConversionParser.h \
     Converter.h \
     DefinitionParser.h \
     DerivationParser.h \
@@ -13,6 +14,7 @@ HEADERS += \
     UnitSystem.h \
 
 SOURCES += \
+    ConversionParser.cpp \
     Converter.cpp \
     DefinitionParser.cpp \
     DerivationParser.cpp \

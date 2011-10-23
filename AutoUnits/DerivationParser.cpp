@@ -81,7 +81,7 @@ public:
     /// 
     /// \return True if the value is a scalar.
     /// 
-    virtual bool IsInteger() const { return m_scalar >= 0; }
+    bool IsInteger() const { return m_scalar >= 0; }
     
     //==========================================================================
     /// Get the dimension ID of the token.

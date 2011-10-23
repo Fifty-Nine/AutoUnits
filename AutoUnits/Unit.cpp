@@ -33,13 +33,63 @@ const Dimension *Unit::GetDimension() const
 }
 
 //==============================================================================
-/// Get the conversion from the unit to the base unit.
+/// Get the conversion to the base unit.
 /// 
-/// \return The text of the conversion.
+/// \return The conversion.
 /// 
-QString Unit::Conversion() const
+const Conversion *Unit::ToBase() const
 {
-    return m_conversion;
+    return m_to_base.get();
+}
+
+//==============================================================================
+/// Get the conversion to the base unit.
+/// 
+/// \return The conversion.
+/// 
+Conversion *Unit::ToBase() 
+{
+    return m_to_base.get();
+}
+
+//==============================================================================
+/// Get the conversion from the base unit.
+/// 
+/// \return The conversion.
+/// 
+const Conversion *Unit::FromBase() const
+{
+    return m_from_base.get();
+}
+
+//==============================================================================
+/// Get the conversion from the base unit.
+/// 
+/// \return The conversion.
+/// 
+Conversion *Unit::FromBase() 
+{
+    return m_from_base.get();
+}
+
+//==============================================================================
+/// Set the to-base conversion.
+/// 
+/// \param [in] conv_p The conversion.
+/// 
+void Unit::SetToBase( std::auto_ptr<Conversion> conv_p )
+{
+    m_to_base.reset( conv_p.release() );
+}
+
+//==============================================================================
+/// Set the from-base conversion.
+/// 
+/// \param [in] conv_p The conversion.
+/// 
+void Unit::SetFromBase( std::auto_ptr<Conversion> conv_p )
+{
+    m_from_base.reset( conv_p.release() );
 }
 
 //==============================================================================
@@ -53,23 +103,13 @@ Dimension *Unit::GetDimension()
 }
 
 //==============================================================================
-/// Set the conversion from the unit to the base unit.
-/// 
-/// \param [in] conversion The new conversion.
-/// 
-void Unit::SetConversion( const QString& conversion ) 
-{
-    m_conversion = conversion;
-}
-
-//==============================================================================
 /// Constructor.
 /// 
 /// \param [in] name The name of the unit.
 /// \param [in] dimension_p The dimension for the unit.
 /// 
 Unit::Unit( const QString& name, Dimension *dimension_p ) : 
-    m_name( name ), m_dim_p( dimension_p ), m_conversion( "1.0" )
+    m_name( name ), m_dim_p( dimension_p )
 {
     m_dim_p->AddUnit( this );
 }

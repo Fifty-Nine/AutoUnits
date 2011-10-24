@@ -32,11 +32,11 @@ Conversion::~Conversion()
 /// 
 /// \param [in] factor The scaling factor.
 /// 
-std::auto_ptr<Conversion> Conversion::ScaleFactor( double factor )
+Conversion::AutoPtr Conversion::ScaleFactor( double factor )
 {
-    std::auto_ptr<Conversion> lhs_p( new Constant( factor ) );
-    std::auto_ptr<Conversion> rhs_p( new Value );
-    return std::auto_ptr<Conversion>( new MultOp( lhs_p, rhs_p ) );
+    Conversion::AutoPtr lhs_p( new Constant( factor ) );
+    Conversion::AutoPtr rhs_p( new Value );
+    return Conversion::AutoPtr( new MultOp( lhs_p, rhs_p ) );
 }
 
 //==============================================================================
@@ -124,12 +124,11 @@ Conversion::AutoPtr Value::Compose( const Conversion& value ) const
 //==============================================================================
 /// Constructor.
 /// 
-/// \param [in] lhs The left hand side.
-/// \param [in] rhs The right hand side.
+/// \param [in] lhs_p The left hand side.
+/// \param [in] rhs_p The right hand side.
 /// 
-AddOp::AddOp( 
-    std::auto_ptr<Conversion> lhs_p, std::auto_ptr<Conversion> rhs_p ) : 
-    BinOp( lhs_p, rhs_p )
+AddOp::AddOp( Conversion::AutoPtr lhs_p, Conversion::AutoPtr rhs_p ) : 
+    Private::BinOp<AddOp>( lhs_p, rhs_p )
 { 
 }
 
@@ -169,12 +168,11 @@ Conversion::AutoPtr AddOp::Compose( const Conversion& value ) const
 //==============================================================================
 /// Constructor.
 /// 
-/// \param [in] lhs The left hand side.
-/// \param [in] rhs The right hand side.
+/// \param [in] lhs_p The left hand side.
+/// \param [in] rhs_p The right hand side.
 /// 
-SubOp::SubOp( 
-    std::auto_ptr<Conversion> lhs_p, std::auto_ptr<Conversion> rhs_p ) : 
-    BinOp( lhs_p, rhs_p )
+SubOp::SubOp( Conversion::AutoPtr lhs_p, Conversion::AutoPtr rhs_p ) : 
+    Private::BinOp<SubOp>( lhs_p, rhs_p )
 {
 }
 
@@ -214,9 +212,11 @@ Conversion::AutoPtr SubOp::Compose( const Conversion& value ) const
 //==============================================================================
 /// Constructor.
 /// 
-MultOp::MultOp( 
-    std::auto_ptr<Conversion> lhs_p, std::auto_ptr<Conversion> rhs_p ) :
-    BinOp( lhs_p, rhs_p )
+/// \param [in] lhs_p The left-hand side of the multiplication.
+/// \param [in] rhs_p The right-hand side of the multiplication.
+/// 
+MultOp::MultOp( Conversion::AutoPtr lhs_p, Conversion::AutoPtr rhs_p ) :
+    Private::BinOp<MultOp>( lhs_p, rhs_p )
 {
 }
 
@@ -256,9 +256,8 @@ Conversion::AutoPtr MultOp::Compose( const Conversion& value ) const
 //==========================================================================
 /// Constructor.
 /// 
-DivOp::DivOp( 
-    std::auto_ptr<Conversion> lhs_p, std::auto_ptr<Conversion> rhs_p ) : 
-    BinOp( lhs_p, rhs_p )
+DivOp::DivOp( Conversion::AutoPtr lhs_p, Conversion::AutoPtr rhs_p ) : 
+    Private::BinOp<DivOp>( lhs_p, rhs_p )
 {
 }
 
@@ -311,8 +310,8 @@ Conversion::AutoPtr Compose( const Conversion& f, const Conversion& g )
 //==============================================================================
 /// Convenience function to compose two conversions.
 /// 
-/// \param [in] f_p The f(x) conversion.
-/// \param [in] g_p The g(x) conversion.
+/// \param [in] f The f(x) conversion.
+/// \param [in] g The g(x) conversion.
 /// 
 /// \return A conversion for f(g(x)).
 /// 

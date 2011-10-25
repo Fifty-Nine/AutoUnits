@@ -2,6 +2,7 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     AutoUnits \
+    Python \
     Tools \
 
 doxy.commands = doxygen Doxyfile

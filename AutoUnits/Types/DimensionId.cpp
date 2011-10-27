@@ -5,10 +5,11 @@
 ///
 //==============================================================================
 
+#include <functional>
+
 #include <QSet>
 
 #include "Types/DimensionId.h"
-
 
 namespace AutoUnits
 {
@@ -21,11 +22,17 @@ QSet<QString> AllKeys( const DimensionId& lhs, const DimensionId& rhs )
     return lhs.uniqueKeys().toSet().unite( rhs.uniqueKeys().toSet() );
 }
 
-int add( int a, int b ) { return a + b; }
-int sub( int a, int b ) { return a - b; }
-
+//==============================================================================
+/// Apply the operation to each corresponding value in the dimension IDs, 
+/// returning a new dimension ID with the results.
+///
+/// e.g., lhs = { "Meter"->1, "Second"->1 } 
+///       rhs = { "Second"-> (-1) }
+///       ApplyToAll( lhs, rhs, std::plus ) = { "Meter"->1, "Second"->0 }
+///
+template<class BinaryOperator>
 DimensionId ApplyToAll( const DimensionId& lhs, const DimensionId& rhs, 
-    int (*operation)(int,int) )
+    BinaryOperator operation )
 {
     QSet<QString> all_keys = AllKeys( lhs, rhs );
 
@@ -83,7 +90,7 @@ bool DimensionId::operator==( const DimensionId& rhs ) const
 /// 
 DimensionId DimensionId::operator*( const DimensionId& rhs ) const
 {
-    return ApplyToAll( *this, rhs, &add );
+    return ApplyToAll( *this, rhs, std::plus<int>() );
 }
 
 //==============================================================================
@@ -95,7 +102,7 @@ DimensionId DimensionId::operator*( const DimensionId& rhs ) const
 /// 
 DimensionId DimensionId::operator/( const DimensionId& rhs ) const
 {
-    return ApplyToAll( *this, rhs, &sub );
+    return ApplyToAll( *this, rhs, std::minus<int>() );
 }
 
 //==============================================================================

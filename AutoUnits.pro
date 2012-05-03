@@ -2,8 +2,9 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     AutoUnits \
-    Python \
     Tools \
+
+with_python:SUBDIRS += Python
 
 doxy.commands = doxygen Doxyfile
 QMAKE_EXTRA_TARGETS += doxy

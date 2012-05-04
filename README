@@ -1,0 +1,42 @@
+
+*
+* What is AutoUnits?
+*
+AutoUnits is a C++ library for dealing with quantities--that is, values with
+units. It allows you to define a units system using a convenient YAML-based
+format. You can use AutoUnits to perform unit conversions from one unit to
+another, perform math on those units, define your own unit systems, etc. 
+
+Someday, AutoUnits will support generating C++ code from a unit system
+definition allowing for static checking of unit conversions where possible
+(e.g., it would be a compiler error to convert from meters to joules).
+
+Currently there's no API documentation (besides what you can generate from
+Doxygen), but hopefully that will change someday!
+
+*
+* Building AutoUnits
+* 
+AutoUnits is a Qt-based library. To build it you will need the following
+dependencies:
+  - Qt (http://qt.nokia.com/products/)
+  - boost (http://www.boost.org)
+  - yaml-cpp (http://code.google.com/p/yaml-cpp/)
+
+Once you've gotten these libraries, you're ready to build the library.
+
+Before building, you'll need to define the BOOST_PATH and YAML_CPP_PATH to point
+to your boost and yaml-cpp installations. These variables are added to the
+include path, they should be set such that #include <boost/*.h> and 
+#include <yaml-cpp/*.h> work as expected. 
+
+With that done, cd into the AutoUnits directory and run qmake and make. The
+library should compile and be ready for use. Examples for using the library
+are included under the Tools/ directory.
+
+*
+* License
+*
+AutoUnits is distributed under the Boost license. See LICENSE for more 
+information.
+

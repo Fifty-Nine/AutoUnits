@@ -61,19 +61,24 @@ public:
 
             const Unit& other = *other_units[i];
 
-            double c = m_converter.Convert( other.Name(), unit.Name(), 1.0 );
+            const Conversion& to = 
+                *m_converter.GetConversion( other.Name(), unit.Name() );
+            const Conversion& from = 
+                *m_converter.GetConversion( unit.Name(), other.Name() );
 
-            out << Indent(2) << unit.Name() << " -- " << other.Name() 
-                << "[ label=\"" << c << "\"";
+            out << Indent(2) << unit.Name() << " -> " << other.Name() 
+                << "[ label=\"" << to.ToString() << "\" ];\n";
+            out << Indent(2) << other.Name() << " -> " << unit.Name() 
+                << "[ label=\"" << from.ToString() << "\" ];\n";
 
-            out << " ];\n";
         }
 
     }
 
     void Graph( QTextStream& out, const UnitSystem& system )
     {
-        out << "graph UnitSystem {\n";
+        out << "digraph UnitSystem {\n";
+        out << Indent(1) << "rankdir=\"LR\";\n";
 
         QList<const Unit*> units = system.Units();
         for ( int i = 0; i < units.count(); ++i )

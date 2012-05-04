@@ -5,6 +5,8 @@
 ///
 //==============================================================================
 
+#include <QTextStream>
+
 #include "Types/Conversion.h"
 
 namespace AutoUnits
@@ -12,6 +14,124 @@ namespace AutoUnits
 
 namespace Conversions
 {
+
+namespace
+{
+//==============================================================================
+/// The visitor we use to print conversions.
+/// 
+class ConversionToString : public ConstVisitor
+{
+public:
+    //==========================================================================
+    /// Constructor.
+    /// 
+    /// \param[in] node The node to convert.
+    /// 
+    ConversionToString( const Conversion& node )
+    {
+        m_stream.setString( &m_string, QIODevice::WriteOnly );
+        node.Accept( *this );
+    }
+
+    //==========================================================================
+    /// Convert this visitor into a string.
+    /// 
+    /// \return The string.
+    /// 
+    operator QString() const
+    {
+        return m_string;
+    }
+
+    //==========================================================================
+    /// Visit a constant node.
+    /// 
+    /// \param [in] node The node to visit.
+    /// 
+    virtual void Visit( const Constant& node ) 
+    {
+        m_stream << QString::number( node.Value() );
+    }
+    
+    //==========================================================================
+    /// Visit a value node.
+    /// 
+    virtual void Visit( const Value& )
+    {
+        m_stream << "value";
+    }
+
+    //==========================================================================
+    /// Visit an add node.
+    /// 
+    /// \param [in] node The node to visit.
+    /// 
+    virtual void Visit( const AddOp& node )
+    {
+        m_stream << '(';
+        node.GetLeft()->Accept( *this );
+        m_stream << '+';
+        node.GetRight()->Accept( *this );
+        m_stream << ')';
+    }
+
+    //==========================================================================
+    /// Visit a sub node.
+    /// 
+    /// \param [in] node The node to visit.
+    /// 
+    virtual void Visit( const SubOp& node )
+    {
+        m_stream << '(';
+        node.GetLeft()->Accept( *this );
+        m_stream << '-';
+        node.GetRight()->Accept( *this );
+        m_stream << ')';
+    }
+
+    //==========================================================================
+    /// Visit a mutliply node.
+    /// 
+    /// \param [in] node The node to visit.
+    /// 
+    virtual void Visit( const MultOp& node )
+    {
+        m_stream << '(';
+        node.GetLeft()->Accept( *this );
+        m_stream << '*';
+        node.GetRight()->Accept( *this );
+        m_stream << ')';
+    }
+
+    //==========================================================================
+    /// Visit a div node.
+    /// 
+    /// \param [in] node The node to visit.
+    /// 
+    virtual void Visit( const DivOp& node )
+    {
+        m_stream << '(';
+        node.GetLeft()->Accept( *this );
+        m_stream << '/';
+        node.GetRight()->Accept( *this );
+        m_stream << ')';
+    }
+
+private:
+    /// Not implemented.
+    ConversionToString();
+    /// Not implemented.
+    ConversionToString( const ConversionToString& );
+    /// Not implemented.
+    ConversionToString& operator=( const ConversionToString& );
+
+    /// The string.
+    QString m_string;
+    /// The output stream.
+    QTextStream m_stream;
+};
+} // namespace
 
 //==============================================================================
 /// Constructor.
@@ -25,6 +145,16 @@ Conversion::Conversion()
 /// 
 Conversion::~Conversion()
 {
+}
+
+//==============================================================================
+/// Convert the conversion to a string.
+/// 
+/// \return The string.
+/// 
+QString Conversion::ToString() const
+{
+    return ConversionToString( *this );
 }
 
 //==============================================================================

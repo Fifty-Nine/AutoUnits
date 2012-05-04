@@ -25,6 +25,7 @@ class Conversion
 public:
     Conversion();
     virtual ~Conversion();
+    QString ToString() const;
 
     typedef std::auto_ptr<Conversion> AutoPtr;
     

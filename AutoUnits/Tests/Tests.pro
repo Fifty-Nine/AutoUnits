@@ -11,7 +11,7 @@ LIBS += -lAutoUnits
 
 unix {
     LIBS += -Wl,-rpath=$$OUT_PWD/../$$DESTDIR
-    PRE_TARGETDEPS = $$OUT_PWD/../$$DESTDIR/libAutoUnits.so
+    PRE_TARGETDEPS = $$OUT_PWD/../$$DESTDIR/libAutoUnits.a
 }
 win32:PRE_TARGETDEPS = $$OUT_PWD/../$$DESTDIR/AutoUnits.lib
 

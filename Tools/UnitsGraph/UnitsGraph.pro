@@ -11,8 +11,9 @@ LIBS += -L$$OUT_PWD/../../AutoUnits/Build -lAutoUnits
 INCLUDEPATH += ../../
 
 unix {
-    PRE_TARGETDEPS += $$OUT_PWD/../../AutoUnits/Build/libAutoUnits.so
-    LIBS += -L$$(YAML_CPP_PATH) -lyaml-cpp
+    PRE_TARGETDEPS += $$OUT_PWD/../../AutoUnits/Build/libAutoUnits.a
+    QMAKE_LIBDIR += $$(YAML_CPP_PATH) 
+    LIBS += -lyaml-cpp
     QMAKE_LFLAGS += -Wl,-rpath=$$OUT_PWD/../../AutoUnits/Build
 }
 

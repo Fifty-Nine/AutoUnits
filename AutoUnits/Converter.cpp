@@ -103,20 +103,33 @@ bool Converter::CanConvert( const QString& from, const QString& to ) const
 double Converter::Convert( 
     const QString& from, const QString& to, double value ) const
 {
-    assert( CanConvert( from, to ) );
+    assert( CanConvert( from, to ) );    
+    return GetConversion( from, to )->Eval( value );
+}
 
+//==============================================================================
+/// Get the conversion from the given unit to the other.
+/// 
+/// \param[in] from The source unit type.
+/// \param[in] to The desired unit type.
+/// 
+/// \return The conversion, if it exists.
+/// 
+const Conversion *Converter::GetConversion( 
+    const QString& from, const QString& to ) const
+{
     CacheKey key( from, to );
     Cache::const_iterator it = m_cache.find( key );
     if ( it != m_cache.end() )
     {
-        return it.value()->Eval( value );
+        return it.value();
     }
 
     Conversion *conv_p = Compute( m_system_p, from, to ).release();
 
     m_cache.insert( key, conv_p );
-
-    return conv_p->Eval( value );
+    
+    return conv_p;
 }
 
 } // namespace AutoUnits

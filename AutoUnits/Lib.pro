@@ -1,5 +1,7 @@
 TEMPLATE = lib
 
+CONFIG += static
+
 include( ../Common.pri )
 
 INCLUDEPATH += .
@@ -26,13 +28,6 @@ SOURCES += \
 
 include( Types/Types.pri )
 include( Util/Util.pri )
-
-win32 {
-    LIBPATH += $$(YAML_CPP_PATH)
-    debug:LIBS += -llibyaml-cppmdd
-    release:LIBS += -llibyaml-cppmd
-}
-unix:LIBS += -L$$(YAML_CPP_PATH) -lyaml-cpp
 
 exists( Overrides.pri ) { include( Overrides.pri ) }
 exists( ../Overrides.pri ) { include( ../Overrides.pri ) }

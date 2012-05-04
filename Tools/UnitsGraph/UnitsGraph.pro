@@ -7,16 +7,29 @@ HEADERS += \
 SOURCES += \
     Main.cpp \
 
-LIBS += -L../../AutoUnits/Build -lAutoUnits
+LIBS += -L$$OUT_PWD/../../AutoUnits/Build -lAutoUnits
 INCLUDEPATH += ../../
-QMAKE_LFLAGS += -Wl,-rpath=$$PWD/../../AutoUnits/Build
 
-PRE_TARGETDEPS += ../../AutoUnits/Build/libAutoUnits.so
+unix {
+    PRE_TARGETDEPS += $$OUT_PWD/../../AutoUnits/Build/libAutoUnits.so
+    LIBS += -L$$(YAML_CPP_PATH) -lyaml-cpp
+    QMAKE_LFLAGS += -Wl,-rpath=$$OUT_PWD/../../AutoUnits/Build
+}
 
-run.commands = ./Build/UnitsGraph
+win32:PRE_TARGETDEPS += $$OUT_PWD/../../AutoUnits/Build/AutoUnits.lib
+win32:release {
+    QMAKE_LIBDIR += $$(YAML_CPP_PATH)/Release
+    LIBS += -llibyaml-cppmd
+}
+win32:debug {
+    QMAKE_LIBDIR += $$(YAML_CPP_PATH)/Debug
+    LIBS += -llibyaml-cppmdd
+}
+
+run.commands = $$OUT_PWD/$$DESTDIR/$$TARGET
 QMAKE_EXTRA_TARGETS += run
 
-diagram.dot.depends = $$DESTDIR/$$TARGET ../../UnitDefinitions.yaml
+diagram.dot.depends = $$OUT_PWD/$$DESTDIR/$$TARGET ../../UnitDefinitions.yaml
 diagram.dot.commands = ./Build/UnitsGraph > diagram.dot
 diagram.png.commands = dot -T png -o diagram.png diagram.dot 
 diagram.png.depends = diagram.dot

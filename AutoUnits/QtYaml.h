@@ -1,5 +1,5 @@
-#ifndef OBJECT_VIEWER_DB_OBJECT_QT_YAML_H
-#define OBJECT_VIEWER_DB_OBJECT_QT_YAML_H
+#ifndef AUTOUNITS_QT_YAML_H
+#define AUTOUNITS_QT_YAML_H
 //==============================================================================
 /// \file AutoUnits/QtYaml.h
 /// 
@@ -13,6 +13,9 @@
 #include <QString>
 #include <yaml-cpp/yaml.h>
 
+namespace YAML
+{
+
 //==============================================================================
 /// Stream in operator for YAML nodes and QStrings.
 /// 
@@ -21,7 +24,11 @@
 /// 
 /// \return A reference to the parser.
 /// 
-inline const YAML::Node& operator>>( const YAML::Node& in, QString& string )
+inline const YAML::Node& operator>>( const YAML::Node& in, QString& string );
+
+} // namespace YAML
+
+const YAML::Node& YAML::operator>>( const Node& in, QString& string )
 {
     std::string std_string;
     in >> std_string;
@@ -30,4 +37,4 @@ inline const YAML::Node& operator>>( const YAML::Node& in, QString& string )
     return in;
 }
 
-#endif // OBJECT_VIEWER_DB_OBJECT_QT_YAML_H
+#endif // AUTOUNITS_QT_YAML_H
